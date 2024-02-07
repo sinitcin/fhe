@@ -16,7 +16,8 @@
 /// multiprecision or mixed multiprecision-RNS variants of the schemes can be added in
 /// the future without changing the current design
 pub enum FHEScheme {
-    Invalid = 0,
+    // TODO: Кажется, что это нужно убрать так как в С++ нет опциональных типов
+    // Invalid = 0,
     /// 🇷🇺 Схема CKKS
     /// ---
     /// FHE реализует два RNS-варианта схемы CKKS (далее они делятся на четыре режима в зависимости

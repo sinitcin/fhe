@@ -1,6 +1,6 @@
 pub mod fhe_schemes;
-pub mod scale_technique;
 pub mod parameters;
+pub mod scale_technique;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right
