@@ -21,6 +21,7 @@
 /// The second RNS variant uses a different scaling factor for each level [43].
 /// The following rescaling modes are implemented in FHE (labeled the same way
 /// as for the BGV scheme as there are a lot of similarities between CKKS and BGV):
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ScalingTechnique {
     /// 🇷🇺 Вариант RNS [8, 21], в котором переключение модуля осуществляется пользователем вручную.
     ///

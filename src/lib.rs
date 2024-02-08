@@ -1,3 +1,4 @@
+pub mod errors;
 pub mod fhe_schemes;
 pub mod parameters;
 pub mod scale_technique;
