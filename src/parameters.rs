@@ -28,14 +28,13 @@ pub struct SchemeParameters {
     /// 🇬🇧 Max relinearization degree of secret key polynomial (used for lazy relinearization)
     max_relinearization_secret_key_degree: u32,
 
-
     /// 🇷🇺 Техника переключения ключей: BV или HYBRID в настоящее время
     /// Для BV у нас нет дополнительного модуля, поэтому безопасность зависит от модуля шифротекста Q.
     /// Для HYBRID у нас есть дополнительный модуль P, поэтому безопасность зависит от модуля P*Q.
     /// Для BV нам нужен digitSize - размер цифры в цифровом разложении
     /// Для HYBRID нам нужно numLargeDigits - количество цифр в цифровом разложении
     /// Хорошо бы иметь альтернативу numLargeDigits (возможно, numPrimesInDigit?).
-    /// 
+    ///
     /// 🇬🇧 key switching technique: BV or HYBRID currently
     /// For BV we do not have extra modulus, so the security depends on ciphertext modulus Q.
     /// For HYBRID we do have extra modulus P, so the security depends on modulus P*Q
@@ -46,7 +45,7 @@ pub struct SchemeParameters {
 
     /// 🇷🇺 техника переключения масштаба/модуля, используемая в CKKS/BGV: FLEXIBLEAUTOEXT, FIXEDMANUL, FLEXIBLEAUTO и др.
     /// Подробности см. тут https://eprint.iacr.org/2022/915
-    /// 
+    ///
     /// 🇬🇧 rescaling/modulus switching technique used in CKKS/BGV: FLEXIBLEAUTOEXT, FIXEDMANUL, FLEXIBLEAUTO, etc.
     /// see https://eprint.iacr.org/2022/915 for details
     scale_technique: ScalingTechnique,
@@ -89,13 +88,13 @@ pub struct SchemeParameters {
     /// 🇬🇧 Desired precision for 128-bit CKKS. We use this value in NOISE_FLOODING_DECRYPT mode to determine the scaling factor.
     desired_precision: f64,
 
-    /// 🇷🇺 Статистическая безопасность CKKS в режиме NOISE_FLOODING_DECRYPT. Это ограничение на вероятность успеха, которую может иметь любой противник. 
+    /// 🇷🇺 Статистическая безопасность CKKS в режиме NOISE_FLOODING_DECRYPT. Это ограничение на вероятность успеха, которую может иметь любой противник.
     /// В частности, вероятность успеха не более 2^(-statisticalSecurity).
     /// 🇬🇧 Statistical security of CKKS in NOISE_FLOODING_DECRYPT mode. This is the bound on the probability of success
     /// that any adversary can have. Specifically, they a probability of success of at most 2^(-statisticalSecurity).
     statistical_security: u32,
 
-    /// 🇷🇺 Это количество неблагоприятных запросов, ожидаемых пользователем для своего приложения, которое мы используем для 
+    /// 🇷🇺 Это количество неблагоприятных запросов, ожидаемых пользователем для своего приложения, которое мы используем для
     /// обеспечения безопасности CKKS в режиме NOISE_FLOODING_DECRYPT.
     /// 🇬🇧 This is the number of adversarial queries a user is expecting for their application, which we use to ensure
     /// security of CKKS in NOISE_FLOODING_DECRYPT mode.
@@ -111,7 +110,7 @@ pub struct SchemeParameters {
     /// где q_0 - первая простая, а ее количество битов равно firstModSize
     /// Остальные q_i имеют одинаковое количество битов и равны scalingModSize
     /// Простое q' не задается явно, но оно используется внутри схем CKKS и BGV (в методах масштабирования *EXT)
-    /// 
+    ///
     /// 🇬🇧 firstModSize and scalingModSize are used to calculate ciphertext modulus. The ciphertext modulus should be seen as:
     /// Q = q_0 * q_1 * ... * q_n * q'
     /// where q_0 is first prime, and it's number of bits is firstModSize
@@ -129,11 +128,10 @@ pub struct SchemeParameters {
     /// 🇬🇧 multiplicative depth
     multiplicative_depth: u32,
 
-
     /// 🇷🇺 Уровень безопасности:
     /// Мы используем значения из стандарта безопасности по адресу
     /// http://homomorphicencryption.org/wp-content/uploads/2018/11/HomomorphicEncryptionStandardv1.1.pdf
-    /// Для заданной размерности кольца и уровня безопасности мы имеем верхнюю границу 
+    /// Для заданной размерности кольца и уровня безопасности мы имеем верхнюю границу
     /// возможного наибольшего модуля (Q для BV или P*Q для HYBRID).
 
     /// 🇬🇧 security level:
@@ -160,9 +158,9 @@ pub struct SchemeParameters {
     multi_hop_mod_size: u32,
 
     /// 🇷🇺 СТАНДАРТНЫЙ или РАСШИРЕННЫЙ режим для шифрования BFV
-    /// EXTENDED немного уменьшает размер Q (на несколько бит), 
+    /// EXTENDED немного уменьшает размер Q (на несколько бит),
     /// но делает шифрование несколько медленнее подробности см. https://eprint.iacr.org/2022/915
-    /// 
+    ///
     /// 🇬🇧 STANDARD or EXTENDED mode for BFV encryption
     /// EXTENDED slightly reduces the size of Q (by few bits) but makes encryption somewhat slower
     /// see https://eprint.iacr.org/2022/915 for details
@@ -170,7 +168,7 @@ pub struct SchemeParameters {
 
     /// 🇷🇺 метод умножения в BFV: BEHZ, HPS и т.д.
     /// Подробности см. https://eprint.iacr.org/2022/915
-    /// 
+    ///
     /// 🇬🇧 multiplication method in BFV: BEHZ, HPS, etc.
     /// see https://eprint.iacr.org/2022/915 for details
     multiplication_technique: MultiplicationTechnique,
@@ -179,7 +177,7 @@ pub struct SchemeParameters {
     /// Установка степени сжатия шифротекста (SLACK или COMPACT)
     /// SLACK имеет более слабые предположения о безопасности, поэтому менее эффективен
     /// COMPACT имеет более сильные предположения о безопасности, поэтому более эффективен
-    /// 
+    ///
     /// 🇬🇧 Interactive multi-party bootstrapping parameter
     /// Set the compression level in ciphertext (SLACK or COMPACT)
     /// SLACK has weaker security assumption, thus less efficient
@@ -188,7 +186,42 @@ pub struct SchemeParameters {
 }
 
 impl SchemeParameters {
-    fn set_to_defaults(&mut self, scheme: FHEScheme) -> Result<(), FHEError> {
+    pub fn new() -> Self {
+        Self {
+            scheme: FHEScheme::CKKSRNS,
+            plain_text_modulus: 0,
+            digit_size: 0,
+            standard_deviation: 3.19,
+            secret_key_distribution: SecretKeyDistribution::UniformTernary,
+            max_relinearization_secret_key_degree: 2,
+            key_switch_technique: KeySwitchTechnique::HYBRID,
+            scale_technique: ScalingTechnique::FlexibleAutoExt,
+            batch_size: 0,
+            proxy_reencryption_mode: Some(ProxyReEncryptionMode::InDCPA),
+            multiparty_mode: MultipartyMode::FixedNoiseMultiparty,
+            execution_mode: ExecutionMode::Evaluation,
+            decryption_noise_mode: DecryptionNoiseMode::FixedNoiseDecrypt,
+            noise_estimate: 0.0,
+            desired_precision: 25.0,
+            statistical_security: 30,
+            num_adversarial_queries: 1,
+            threshold_num_of_parties: 1,
+            first_mod_size: 60,
+            scaling_mod_size: 59,
+            num_large_digits: 0,
+            multiplicative_depth: 1,
+            security_level: SecurityLevel::HEstd128Classic,
+            ring_dimension: 0,
+            eval_add_count: 0,
+            key_switch_count: 0,
+            multi_hop_mod_size: 0,
+            encryption_technique: EncryptionTechnique::STANDARD,
+            multiplication_technique: MultiplicationTechnique::HPS,
+            interactive_boot_compression_level: CompressionLevel::Slack,
+        }
+    }
+
+    pub fn set_to_defaults(&mut self, scheme: FHEScheme) -> Result<(), FHEError> {
         match scheme {
             FHEScheme::CKKSRNS => {
                 let _ = mem::replace(
@@ -489,7 +522,7 @@ impl SchemeParameters {
         Ok(())
     }
 
-    pub fn set_scale_technique(
+    pub fn set_scaling_technique(
         &mut self,
         scale_technique: ScalingTechnique,
     ) -> Result<(), FHEError> {
@@ -699,7 +732,7 @@ pub enum MultiplicationTechnique {
     HPSPOVERQLEVELED,
 }
 
-/// 🇷🇺 Определение уровня, до которого доводится входной шифротекст перед 
+/// 🇷🇺 Определение уровня, до которого доводится входной шифротекст перед
 /// интерактивным многосторонним бутстрапингом
 /// 🇬🇧 Defining the level to which the input ciphertext is brought to before
 /// interactive multi-party bootstrapping
@@ -710,3 +743,36 @@ enum CompressionLevel {
     Compact = 2, // more efficient with stronger security assumption
     Slack = 3,   // less efficient with weaker security assumption
 }
+
+// mod libcrypto {
+// pub struct CryptoContextCKKSRNS;
+
+// impl CryptoContextCKKSRNS {
+//     pub type ContextType = CryptoContext<Element>;
+//     pub type Factory = CryptoContextFactory<Element>;
+//     pub type PublicKeyEncryptionScheme = SchemeCKKSRNS;
+//     pub type CryptoParams = CryptoParametersCKKSRNS;
+//     pub type Element = DCRTPoly;
+
+//     pub fn gen_crypto_context(parameters: &CCParams<CryptoContextCKKSRNS>) -> CryptoContext<Element> {
+//         gen_crypto_context_ckksrns_internal::<CryptoContextCKKSRNS, Element>(parameters)
+//     }
+// }
+// }
+
+// trait CryptoContext {
+//     type Element; //                    = DCRTPoly;
+//     type ContextType; //                = CryptoContext<Element>;  // required by GenCryptoContext() in gen-cryptocontext.h
+//     type Factory; //                    = CryptoContextFactory<Element>;
+//     type PublicKeyEncryptionScheme; //  = SchemeCKKSRNS;
+//     type CryptoParams; /// .
+//     //               = CryptoParametersCKKSRNS;
+
+//     fn genCryptoContext<CryptoContextCKKSRNS>(parameters: &CCParams<CryptoContextCKKSRNS>) -> Rc<CryptoContextement> {
+//         genCryptoContextCKKSRNSInternal<CryptoContextCKKSRNS, Element>(parameters);
+//     }
+// }
+
+// pub struct CCParams<CryptoContext> {
+//     params: SchemeParameters,
+// }
