@@ -5,6 +5,7 @@ use crate::{errors::FHEError, fhe_schemes::FHEScheme, scale_technique::ScalingTe
 pub type PlaintextModulus = u64;
 
 #[allow(dead_code)]
+#[derive(Clone, Debug, Default)]
 pub struct SchemeParameters {
     scheme: FHEScheme,
 
@@ -48,7 +49,7 @@ pub struct SchemeParameters {
     ///
     /// 🇬🇧 rescaling/modulus switching technique used in CKKS/BGV: FLEXIBLEAUTOEXT, FIXEDMANUL, FLEXIBLEAUTO, etc.
     /// see https://eprint.iacr.org/2022/915 for details
-    scale_technique: ScalingTechnique,
+    scaling_technique: ScalingTechnique,
 
     /// 🇷🇺 максимальный размер пакета сообщений, которые необходимо упаковать в кодировку (количество слотов)
     /// 🇬🇧 max batch size of messages to be packed in encoding (number of slots)
@@ -186,39 +187,10 @@ pub struct SchemeParameters {
 }
 
 impl SchemeParameters {
-    pub fn new() -> Self {
-        Self {
-            scheme: FHEScheme::CKKSRNS,
-            plain_text_modulus: 0,
-            digit_size: 0,
-            standard_deviation: 3.19,
-            secret_key_distribution: SecretKeyDistribution::UniformTernary,
-            max_relinearization_secret_key_degree: 2,
-            key_switch_technique: KeySwitchTechnique::HYBRID,
-            scale_technique: ScalingTechnique::FlexibleAutoExt,
-            batch_size: 0,
-            proxy_reencryption_mode: Some(ProxyReEncryptionMode::InDCPA),
-            multiparty_mode: MultipartyMode::FixedNoiseMultiparty,
-            execution_mode: ExecutionMode::Evaluation,
-            decryption_noise_mode: DecryptionNoiseMode::FixedNoiseDecrypt,
-            noise_estimate: 0.0,
-            desired_precision: 25.0,
-            statistical_security: 30,
-            num_adversarial_queries: 1,
-            threshold_num_of_parties: 1,
-            first_mod_size: 60,
-            scaling_mod_size: 59,
-            num_large_digits: 0,
-            multiplicative_depth: 1,
-            security_level: SecurityLevel::HEstd128Classic,
-            ring_dimension: 0,
-            eval_add_count: 0,
-            key_switch_count: 0,
-            multi_hop_mod_size: 0,
-            encryption_technique: EncryptionTechnique::STANDARD,
-            multiplication_technique: MultiplicationTechnique::HPS,
-            interactive_boot_compression_level: CompressionLevel::Slack,
-        }
+    pub fn new(scheme: FHEScheme) -> Self {
+        let mut parameters = Self::default();
+        parameters.set_to_defaults(scheme).expect("Unable to initialize scheme parameters");
+        parameters
     }
 
     pub fn set_to_defaults(&mut self, scheme: FHEScheme) -> Result<(), FHEError> {
@@ -234,7 +206,7 @@ impl SchemeParameters {
                         secret_key_distribution: SecretKeyDistribution::UniformTernary,
                         max_relinearization_secret_key_degree: 2,
                         key_switch_technique: KeySwitchTechnique::HYBRID,
-                        scale_technique: ScalingTechnique::FlexibleAutoExt,
+                        scaling_technique: ScalingTechnique::FlexibleAutoExt,
                         batch_size: 0,
                         proxy_reencryption_mode: Some(ProxyReEncryptionMode::InDCPA),
                         multiparty_mode: MultipartyMode::FixedNoiseMultiparty,
@@ -271,7 +243,7 @@ impl SchemeParameters {
                         secret_key_distribution: SecretKeyDistribution::UniformTernary,
                         max_relinearization_secret_key_degree: 2,
                         key_switch_technique: KeySwitchTechnique::BV,
-                        scale_technique: ScalingTechnique::NoRescale,
+                        scaling_technique: ScalingTechnique::NoRescale,
                         batch_size: 0,
                         proxy_reencryption_mode: Some(ProxyReEncryptionMode::InDCPA),
                         multiparty_mode: MultipartyMode::FixedNoiseMultiparty,
@@ -308,7 +280,7 @@ impl SchemeParameters {
                         secret_key_distribution: SecretKeyDistribution::UniformTernary,
                         max_relinearization_secret_key_degree: 2,
                         key_switch_technique: KeySwitchTechnique::HYBRID,
-                        scale_technique: ScalingTechnique::FlexibleAutoExt,
+                        scaling_technique: ScalingTechnique::FlexibleAutoExt,
                         batch_size: 0,
                         proxy_reencryption_mode: Some(ProxyReEncryptionMode::InDCPA),
                         multiparty_mode: MultipartyMode::FixedNoiseMultiparty,
@@ -382,8 +354,8 @@ impl SchemeParameters {
         self.key_switch_technique
     }
 
-    pub fn scale_technique(&self) -> ScalingTechnique {
-        self.scale_technique
+    pub fn scaling_technique(&self) -> ScalingTechnique {
+        self.scaling_technique
     }
 
     pub fn batch_size(&self) -> u32 {
@@ -524,9 +496,9 @@ impl SchemeParameters {
 
     pub fn set_scaling_technique(
         &mut self,
-        scale_technique: ScalingTechnique,
+        scaling_technique: ScalingTechnique,
     ) -> Result<(), FHEError> {
-        self.scale_technique = scale_technique;
+        self.scaling_technique = scaling_technique;
         Ok(())
     }
 
@@ -673,10 +645,11 @@ pub enum SecretKeyDistribution {
     // UNIFORM_QUINARY,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum KeySwitchTechnique {
     Invalid = 0,
     BV,
+    #[default]
     HYBRID,
 }
 
@@ -688,27 +661,31 @@ pub enum ProxyReEncryptionMode {
     DivideAndRoundHRA,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MultipartyMode {
     InvalidMultipartyMode = 0,
+    #[default]
     FixedNoiseMultiparty,
     NoiseFloodingMultiparty,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ExecutionMode {
+    #[default]
     Evaluation = 0,
     NoiseEstimation,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DecryptionNoiseMode {
+    #[default]
     FixedNoiseDecrypt = 0,
     NoiseFloodingDecrypt,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SecurityLevel {
+    #[default]
     HEstd128Classic,
     HEstd192Classic,
     HEstd256Classic,
@@ -718,15 +695,17 @@ pub enum SecurityLevel {
     HEstdNotSet,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EncryptionTechnique {
+    #[default]
     STANDARD = 0,
     EXTENDED,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MultiplicationTechnique {
     BEHZ = 0,
+    #[default]
     HPS,
     HPSPOVERQ,
     HPSPOVERQLEVELED,
@@ -736,12 +715,13 @@ pub enum MultiplicationTechnique {
 /// интерактивным многосторонним бутстрапингом
 /// 🇬🇧 Defining the level to which the input ciphertext is brought to before
 /// interactive multi-party bootstrapping
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum CompressionLevel {
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CompressionLevel {
     // we don't support 0 or 1 compression levels
     // do not change values here
     Compact = 2, // more efficient with stronger security assumption
-    Slack = 3,   // less efficient with weaker security assumption
+    #[default]
+    Slack = 3, // less efficient with weaker security assumption
 }
 
 // mod libcrypto {

@@ -1,9 +1,8 @@
-use std::fmt;
+// use std::fmt;
 
 pub trait Serializable {
     fn serialized_object_name(&self) -> String;
 }
-
 
 // impl<T: fmt::Display> fmt::Display for Vec<T> {
 //     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

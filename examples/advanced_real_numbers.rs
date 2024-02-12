@@ -1,5 +1,9 @@
 use fhe::{
-    errors::FHEError, fhe_schemes::FHEScheme, parameters::{self, SchemeParameters}, scale_technique::ScalingTechnique
+    errors::FHEError,
+    fhe_schemes::FHEScheme,
+    gen_cryptocontext_parameters::{self, SchemeParameters},
+    pke::scheme::ckksrns::{CryptoContextCKKSRNS, CryptoContextParams},
+    scale_technique::ScalingTechnique,
 };
 
 fn main() {
@@ -175,8 +179,7 @@ fn automatic_rescale_demo(scale_technique: ScalingTechnique) -> Result<(), FHEEr
     );
 
     let batch_size = 8;
-    let mut parameters = SchemeParameters::new();
-    // let parameters = CryptoContextParams::<CryptoContextCKKSRNS>::new();
+    let mut parameters = CryptoContextParams::<CryptoContextCKKSRNS>::new();
     parameters.set_to_defaults(FHEScheme::CKKSRNS)?;
     parameters.set_multiplicative_depth(5)?;
     parameters.set_scaling_mod_size(50)?;
@@ -185,9 +188,10 @@ fn automatic_rescale_demo(scale_technique: ScalingTechnique) -> Result<(), FHEEr
 
     // let cc = gen_crypto_context(parameters)?;
 
-    println!("CKKS scheme is using ring dimension {}\n\n", parameters.ring_dimension());
-
-    
+    println!(
+        "CKKS scheme is using ring dimension {}\n\n",
+        parameters.ring_dimension()
+    );
 
     todo!()
 }

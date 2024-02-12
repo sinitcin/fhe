@@ -1,10 +1,9 @@
+pub mod core;
 pub mod errors;
 pub mod fhe_schemes;
-pub mod parameters;
+pub mod pke;
 pub mod scale_technique;
 pub mod serializable;
-pub mod core;
-pub mod pke;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

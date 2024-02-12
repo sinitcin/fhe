@@ -21,7 +21,7 @@
 /// The second RNS variant uses a different scaling factor for each level [43].
 /// The following rescaling modes are implemented in FHE (labeled the same way
 /// as for the BGV scheme as there are a lot of similarities between CKKS and BGV):
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ScalingTechnique {
     /// 🇷🇺 Вариант RNS [8, 21], в котором переключение модуля осуществляется пользователем вручную.
     ///
@@ -81,6 +81,7 @@ pub enum ScalingTechnique {
     /// If the goal is to minimize the ciphertext modulus Q for the same precision, then the FLEXIBALEAUTOEXT mode is the best option. In some scenarios, the decrease in Q may also
     /// result in reduced ring dimension for the same security level, yielding better performance for
     /// FLEXIBLEAUTOEXT as compared to all other modes.
+    #[default]
     FlexibleAutoExt,
 
     /// 🇷🇺 Без изменения масштаба

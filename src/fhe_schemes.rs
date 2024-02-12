@@ -15,7 +15,7 @@
 /// small numbers that fit in machine words, e.g., in 64-bit integers. However,
 /// multiprecision or mixed multiprecision-RNS variants of the schemes can be added in
 /// the future without changing the current design
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, Debug, PartialEq, Eq)]
 pub enum FHEScheme {
     // TODO: Кажется, что это нужно убрать так как в С++ нет опциональных типов
     // Invalid = 0,
@@ -96,6 +96,7 @@ pub enum FHEScheme {
     /// Note that the default method is FLEXIBLEAUTOEXT as it easy to use and achieves highest
     /// precision. Other modes can be considered when there is a need to reduce the runtime (typically by
     /// no more than 1.5x).
+    #[default]
     CKKSRNS,
 
     /// 🇷🇺 Схема BFV
