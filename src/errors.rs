@@ -6,4 +6,6 @@ pub enum FHEError {
     InvalidRingDimension(u32),
     #[error("The provided multiplicative depth: {0}. Multiplicative depth is not computationally feasible")]
     InvalidMultiplicativeDepth(u32),
+    #[error("Unknown error: {0}")]
+    Unknown(String),
 }

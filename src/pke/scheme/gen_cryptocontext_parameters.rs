@@ -189,7 +189,9 @@ pub struct SchemeParameters {
 impl SchemeParameters {
     pub fn new(scheme: FHEScheme) -> Self {
         let mut parameters = Self::default();
-        parameters.set_to_defaults(scheme).expect("Unable to initialize scheme parameters");
+        parameters
+            .set_to_defaults(scheme)
+            .expect("Unable to initialize scheme parameters");
         parameters
     }
 

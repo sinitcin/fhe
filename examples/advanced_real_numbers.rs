@@ -186,7 +186,7 @@ fn automatic_rescale_demo(scale_technique: ScalingTechnique) -> Result<(), FHEEr
     parameters.set_scaling_technique(scale_technique)?;
     parameters.set_batch_size(batch_size)?;
 
-    // let cc = gen_crypto_context(parameters)?;
+    let cc = gen_crypto_context(parameters)?;
 
     println!(
         "CKKS scheme is using ring dimension {}\n\n",

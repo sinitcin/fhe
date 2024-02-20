@@ -1,3 +1,5 @@
+use std::fmt;
+
 ///❗🇷🇺❗
 /// FHE реализует схемы BGV, BFV и CKKS.
 /// Поддерживается несколько вариантов каждой схемы. Для повышения эффективности в настоящее время
@@ -166,3 +168,17 @@ pub enum FHEScheme {
     BGVRNS,
 }
 pub type Scheme = FHEScheme;
+
+impl fmt::Display for FHEScheme {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                FHEScheme::CKKSRNS => "CKKSRNS_SCHEME",
+                FHEScheme::BFVRNS => "BFVRNS_SCHEME",
+                FHEScheme::BGVRNS => "BGVRNS_SCHEME",
+            }
+        )
+    }
+}

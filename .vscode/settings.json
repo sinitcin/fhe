@@ -8,6 +8,7 @@
         "BEHZ",
         "BFVRNS",
         "BGVRNS",
+        "carray",
         "ciphertext",
         "ciphertexts",
         "ckkrns",
@@ -15,6 +16,8 @@
         "Contextement",
         "cryptocontext",
         "DCPA",
+        "Encrypter",
+        "expdtype",
         "Eynard",
         "FIXEDAUTO",
         "FIXEDMANUAL",
@@ -29,13 +32,16 @@
         "HPSPOVERQ",
         "HPSPOVERQLEVELED",
         "keyswitch",
+        "linalg",
         "multiprecision",
+        "ndarray",
         "Polyakov",
         "reencryption",
         "relinearization",
         "schemebase",
         "schemerns",
         "Shoup",
+        "Ubint",
         "Zucca"
     ]
 }
