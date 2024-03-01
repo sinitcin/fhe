@@ -70,7 +70,7 @@ impl CKKSEncoder {
         // H -> sigma(R) s.t. sigma(R) \in H
         let rounded = self.into_integer_basis(scaled);
 
-        /* sigma(R) -> R . Это инверсия сигмы */
+        /* sigma(R) -> R . инверсия сигмы */
         let mut plain_text = self.sigma_inverse(rounded)?;
 
         /* содержит значения c64. Необходимо преобразовать их в целые числа. */
