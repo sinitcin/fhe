@@ -3,14 +3,13 @@
  *
  * @tparam Element a ring element.
  */
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 pub trait CryptoObjectTrait {
     // Define the methods that CryptoObject should have
 }
 
-#[derive(Serialize, Deserialize)]
 pub struct CryptoObject<T> {
     // Fields that CryptoObject should have
 }
@@ -45,12 +44,8 @@ where
     }
 
     pub fn from_shared(crypto_object: Arc<CryptoObject<T>>) -> Self {
-        Key {
-            crypto_object,
-        }
+        Key { crypto_object }
     }
 }
 
 // Implement Serialize and Deserialize for Key if necessary
-
-

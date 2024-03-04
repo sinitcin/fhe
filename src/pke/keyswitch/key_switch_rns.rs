@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct KeySwitchRNS {
@@ -15,5 +15,3 @@ impl KeySwitchRNS {
 }
 
 // Implement any additional methods or traits required for KeySwitchRNS
-
-

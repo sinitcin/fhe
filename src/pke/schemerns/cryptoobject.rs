@@ -1,5 +1,5 @@
-use std::sync::Arc;
 use std::fmt;
+use std::sync::Arc;
 
 pub struct CryptoObject<Element> {
     context: Arc<CryptoContext<Element>>, // Assuming CryptoContext is Arc-wrapped
@@ -80,5 +80,3 @@ impl<'de, Element> serde::Deserialize<'de> for CryptoObject<Element> {
         unimplemented!() // Placeholder for the actual implementation
     }
 }
-
-

@@ -6,23 +6,44 @@ pub struct KeySwitchHYBRID {
 }
 
 impl KeySwitchRNS for KeySwitchHYBRID {
-    fn key_switch_gen_internal(&self, old_private_key: &PrivateKey<DCRTPoly>, new_private_key: &PrivateKey<DCRTPoly>) -> EvalKey<DCRTPoly> {
+    fn key_switch_gen_internal(
+        &self,
+        old_private_key: &PrivateKey<DCRTPoly>,
+        new_private_key: &PrivateKey<DCRTPoly>,
+    ) -> EvalKey<DCRTPoly> {
         unimplemented!()
     }
 
-    fn key_switch_gen_internal_with_eval_key(&self, old_private_key: &PrivateKey<DCRTPoly>, new_private_key: &PrivateKey<DCRTPoly>, eval_key: &EvalKey<DCRTPoly>) -> EvalKey<DCRTPoly> {
+    fn key_switch_gen_internal_with_eval_key(
+        &self,
+        old_private_key: &PrivateKey<DCRTPoly>,
+        new_private_key: &PrivateKey<DCRTPoly>,
+        eval_key: &EvalKey<DCRTPoly>,
+    ) -> EvalKey<DCRTPoly> {
         unimplemented!()
     }
 
-    fn key_switch_gen_internal_with_public_key(&self, old_private_key: &PrivateKey<DCRTPoly>, new_public_key: &PublicKey<DCRTPoly>) -> EvalKey<DCRTPoly> {
+    fn key_switch_gen_internal_with_public_key(
+        &self,
+        old_private_key: &PrivateKey<DCRTPoly>,
+        new_public_key: &PublicKey<DCRTPoly>,
+    ) -> EvalKey<DCRTPoly> {
         unimplemented!()
     }
 
-    fn key_switch_in_place(&self, ciphertext: &mut Ciphertext<DCRTPoly>, eval_key: &EvalKey<DCRTPoly>) {
+    fn key_switch_in_place(
+        &self,
+        ciphertext: &mut Ciphertext<DCRTPoly>,
+        eval_key: &EvalKey<DCRTPoly>,
+    ) {
         unimplemented!()
     }
 
-    fn key_switch_ext(&self, ciphertext: &Ciphertext<DCRTPoly>, add_first: bool) -> Ciphertext<DCRTPoly> {
+    fn key_switch_ext(
+        &self,
+        ciphertext: &Ciphertext<DCRTPoly>,
+        add_first: bool,
+    ) -> Ciphertext<DCRTPoly> {
         unimplemented!()
     }
 
@@ -38,15 +59,29 @@ impl KeySwitchRNS for KeySwitchHYBRID {
         unimplemented!()
     }
 
-    fn eval_key_switch_precompute_core(&self, c: &DCRTPoly, crypto_params_base: &CryptoParametersBase<DCRTPoly>) -> Arc<Vec<DCRTPoly>> {
+    fn eval_key_switch_precompute_core(
+        &self,
+        c: &DCRTPoly,
+        crypto_params_base: &CryptoParametersBase<DCRTPoly>,
+    ) -> Arc<Vec<DCRTPoly>> {
         unimplemented!()
     }
 
-    fn eval_fast_key_switch_core(&self, digits: &Arc<Vec<DCRTPoly>>, eval_key: &EvalKey<DCRTPoly>, params_ql: &Arc<ParmType>) -> Arc<Vec<DCRTPoly>> {
+    fn eval_fast_key_switch_core(
+        &self,
+        digits: &Arc<Vec<DCRTPoly>>,
+        eval_key: &EvalKey<DCRTPoly>,
+        params_ql: &Arc<ParmType>,
+    ) -> Arc<Vec<DCRTPoly>> {
         unimplemented!()
     }
 
-    fn eval_fast_key_switch_core_ext(&self, digits: &Arc<Vec<DCRTPoly>>, eval_key: &EvalKey<DCRTPoly>, params_ql: &Arc<ParmType>) -> Arc<Vec<DCRTPoly>> {
+    fn eval_fast_key_switch_core_ext(
+        &self,
+        digits: &Arc<Vec<DCRTPoly>>,
+        eval_key: &EvalKey<DCRTPoly>,
+        params_ql: &Arc<ParmType>,
+    ) -> Arc<Vec<DCRTPoly>> {
         unimplemented!()
     }
 }
@@ -82,5 +117,3 @@ impl KeySwitchHYBRID {
         "KeySwitchHYBRID"
     }
 }
-
-
