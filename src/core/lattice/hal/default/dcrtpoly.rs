@@ -3,6 +3,19 @@ use std::fmt::Debug;
 use std::ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use std::rc::Rc;
 
+    type Vector<T>                = Vec<T>;
+    type Integer               = VecType::Integer;
+    type Params                = ILDCRTParams<Integer>;
+    type PolyType              = PolyImpl<NativeVector>;
+    type PolyLargeType         = PolyImpl<VecType>;
+    type DCRTPolyType          = DCRTPolyImpl<VecType>;
+    type DCRTPolyInterfaceType = DCRTPolyInterface<DCRTPolyImpl<VecType>, VecType, NativeVector, PolyImpl>;
+    type Precomputations       = DCRTPolyInterfaceType::CRTBasisExtensionPrecomputations;
+    type DggType               = DCRTPolyInterfaceType::DggType;
+    type DugType               = DCRTPolyInterfaceType::DugType;
+    type TugType               = DCRTPolyInterfaceType::TugType;
+    type BugType               = DCRTPolyInterfaceType::BugType;
+
 pub trait DCRTPolyInterface<T>: Clone + Debug + PartialEq
 where
     T: Clone + Debug + PartialEq,
