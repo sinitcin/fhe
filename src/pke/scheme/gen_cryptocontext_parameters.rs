@@ -3,6 +3,7 @@ use std::mem;
 use crate::{errors::FHEError, fhe_schemes::FHEScheme, scale_technique::ScalingTechnique};
 
 pub type PlaintextModulus = u64;
+pub type Params = SchemeParameters; 
 
 #[allow(dead_code)]
 #[derive(Clone, Debug, Default)]
