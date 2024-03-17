@@ -1,6 +1,6 @@
+use std::string::String;
 use std::sync::Arc;
 use std::vec::Vec;
-use std::string::String;
 
 use crate::pke::key::private_key_fwd::PrivateKey;
 
@@ -12,7 +12,10 @@ pub trait KeySwitchBase<Element> {
         old_private_key: &PrivateKey<Element>,
         new_private_key: &PrivateKey<Element>,
     ) -> Result<EvalKey<Element>, String> {
-        Err(format!("{} is not supported", stringify!(key_switch_gen_internal)))
+        Err(format!(
+            "{} is not supported",
+            stringify!(key_switch_gen_internal)
+        ))
     }
 
     fn key_switch_gen_internal_with_eval_key(
@@ -21,7 +24,10 @@ pub trait KeySwitchBase<Element> {
         new_private_key: &PrivateKey<Element>,
         eval_key: &EvalKey<Element>,
     ) -> Result<EvalKey<Element>, String> {
-        Err(format!("{} is not supported", stringify!(key_switch_gen_internal_with_eval_key)))
+        Err(format!(
+            "{} is not supported",
+            stringify!(key_switch_gen_internal_with_eval_key)
+        ))
     }
 
     fn key_switch_gen_internal_with_public_key(
@@ -29,7 +35,10 @@ pub trait KeySwitchBase<Element> {
         old_private_key: &PrivateKey<Element>,
         new_public_key: &PublicKey<Element>,
     ) -> Result<EvalKey<Element>, String> {
-        Err(format!("{} is not supported", stringify!(key_switch_gen_internal_with_public_key)))
+        Err(format!(
+            "{} is not supported",
+            stringify!(key_switch_gen_internal_with_public_key)
+        ))
     }
 
     fn key_switch(
@@ -102,5 +111,3 @@ pub trait KeySwitchBase<Element> {
         Err("EvalFastKeySwitchCoreExt is not supported".to_string())
     }
 }
-
-

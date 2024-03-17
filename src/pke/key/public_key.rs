@@ -1,7 +1,7 @@
+use std::ops::{Deref, DerefMut};
+use std::string::String;
 use std::sync::Arc;
 use std::vec::Vec;
-use std::string::String;
-use std::ops::{Deref, DerefMut};
 
 use crate::pke::gen_cryptocontext::CryptoContext;
 
@@ -28,8 +28,16 @@ impl<Element> PublicKeyImpl<Element> {
         }
     }
 
-    pub fn from_parts(context: Arc<CryptoContext<Element>>, key_tag: String, m_h: Vec<Element>) -> Self {
-        PublicKeyImpl { context, key_tag, m_h }
+    pub fn from_parts(
+        context: Arc<CryptoContext<Element>>,
+        key_tag: String,
+        m_h: Vec<Element>,
+    ) -> Self {
+        PublicKeyImpl {
+            context,
+            key_tag,
+            m_h,
+        }
     }
 
     pub fn is_valid(&self) -> bool {
@@ -73,5 +81,3 @@ impl<Element> Clone for PublicKeyImpl<Element> {
 
 // Serialization and deserialization traits would be implemented here,
 // possibly using serde if Element supports it.
-
-

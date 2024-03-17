@@ -91,5 +91,3 @@ impl<Element: Clone> Clone for PrivateKeyImpl<Element> {
 
 // Serialization and deserialization traits would need to be implemented
 // according to the specific requirements and available libraries in Rust.
-
-

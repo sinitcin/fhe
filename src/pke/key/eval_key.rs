@@ -1,6 +1,6 @@
+use std::fmt;
 use std::sync::Arc;
 use std::vec::Vec;
-use std::fmt;
 
 use crate::pke::gen_cryptocontext::CryptoContext;
 
@@ -115,5 +115,3 @@ impl<Element> fmt::Debug for EvalKeyImpl<Element> {
 
 // Serialization and deserialization traits would need to be implemented
 // using a Rust crate like serde if needed.
-
-

@@ -46,11 +46,7 @@ impl KeySwitchRNS for KeySwitchBV {
         unimplemented!()
     }
 
-    fn key_switch_core(
-        &self,
-        a: &DCRTPoly,
-        eval_key: &EvalKey<DCRTPoly>,
-    ) -> Arc<Vec<DCRTPoly>> {
+    fn key_switch_core(&self, a: &DCRTPoly, eval_key: &EvalKey<DCRTPoly>) -> Arc<Vec<DCRTPoly>> {
         // Method body would be here
         unimplemented!()
     }
@@ -103,5 +99,3 @@ impl KeySwitchBV {
         "KeySwitchBV"
     }
 }
-
-
