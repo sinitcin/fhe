@@ -2,10 +2,12 @@
 // BSD 2-Clause License
 //
 // Copyright (c) 2014-2023, NJIT, Duality Technologies Inc. and other contributors
+//            translated from C++ and upgraded by Anton Sinitsyn
 //
 // All rights reserved.
 //
 // Author TPOC: contact@openfhe.org
+// Anton Sinitsyn: antonsinitsyn@outlook.de
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -56,196 +58,155 @@ pub struct Format;
 /// virtual functions. There is no constructor here in the base class; it
 /// contains no data to construct.
 pub trait ILElement<Idx>:
-    // Standard clone
+    // 🇷🇺 Должен быть реализован стандартный типаж для клонирования
+    // 🇬🇧 Standard clone
     Clone +
-    // Standard destruction
-    // Drop +
 
-    // @brief Оператор неравенства.  Сравнивает значения элемента, с которым нужно сравнить.
-    // @param element элемент, с которым нужно сравнить.
-    // @brief Inequality operator.  Compares values of element to be compared to.
-    // @param element the element to compare to.
+    // 🇷🇺 Оператор неравенства.
+    // Параметр: element элемент, с которым нужно сравнить.
+    // 🇬🇧 Inequality operator.  Compares values of element to be compared to.
+    // Param element the element to compare to.
 
-    // @brief Оператор равенства.  Сравнивает значения элемента, с которым нужно сравнить.
-    // @param element элемент, с которым нужно сравнить.
-    // @brief Equality operator.  Compares values of element to be compared to.
-    // @param element the element to compare to.
+    // 🇷🇺 Оператор равенства.  Сравнивает значения элемента, с которым нужно сравнить.
+    // Параметр: element элемент, с которым нужно сравнить.
+    // 🇬🇧 Equality operator.  Compares values of element to be compared to.
+    // Param element the element to compare to.
     Eq +
 
-    // @brief Унарное отрицание на решетке
-    // @return "решетка
-    // @brief Unary negation on a lattice
-    // @return -lattice
+    // 🇷🇺 Унарное отрицание на решетке, возвращаемое значение: -решетка 
+    // 🇬🇧 Unary negation on a lattice. Return -lattice
     Neg +
 
-    // @brief Скалярное сложение - добавление элемента только к первому индексу.
+    // 🇷🇺 Должно быть реализовано несколько вариантов:
+    //
+    // 1) Скалярное сложение - добавление элемента только к первому индексу.
     // Эта операция допустима только в формате COEFFICIENT.
-    //
-    // @param &element - элемент для добавления по индексу.
-    // @return - возврат операции сложения.
+    // Параметр: element - элемент для добавления по индексу.
+    // Результат: возврат операции сложения.
     // 
+    // 2) Выполняет операцию сложения и возвращает результат.
+    // Параметр: element - элемент для сложения.
+    // Результат: значение сложения.
     // 
-    // @brief Scalar addition - add an element to the first index only.
+    // 🇬🇧 Must be implemented a couple of types of additions:
+    // 
+    // 1) Scalar addition - add an element to the first index only.
     // This operation is only allowed in COEFFICIENT format.
+    // Parameter: element is the element to add entry-wise.
+    // Return is the value of the addition operation.
     //
-    // @param &element is the element to add entry-wise.
-    // @return is the return of the addition operation.
-    //
-    // @brief Выполняет операцию сложения и возвращает результат.
-    //
-    // @param &element - элемент для сложения.
-    // @return - результат сложения.
-    // 
-    // 
-    // @brief Performs an addition operation and returns the result.
-    //
-    // @param &element is the element to add with.
-    // @return is the result of the addition.
+    // 2) Performs an addition operation and returns the result.
+    // Parameter: element is the element to add with.
+    // Return is the value of the addition.
     Add +
 
-    // @brief Скалярное вычитание - вычитание элемента frp, все записи.
-    // @param &element - элемент, из которого нужно вычесть все записи.
+    // 🇷🇺 Должно быть реализовано несколько вариантов:
+    // 1) Скалярное вычитание - вычитание элемента frp, все записи.
+    // Parameter: element - элемент, из которого нужно вычесть все записи.
     // @return - возвращаемое значение операции вычитания.
     //
-    // @brief Scalar subtraction - subtract an element frp, all entries.
-    // @param &element is the element to subtract entry-wise.
-    // @return is the return value of the minus operation.
-
-    /* *
-     * @brief Выполняет операцию вычитания и возвращает результат.
-     *
-     * @param &element - элемент для вычитания.
-     * @return - результат вычитания.
-     * 
-     * @brief Performs a subtraction operation and returns the result.
-     *
-     * @param &element is the element to subtract with.
-     * @return is the result of the subtraction.
-    */
+    // 2) Выполняет операцию вычитания и возвращает результат.
+    // Параметр: element - элемент для вычитания.
+    // Результат: значение вычитания.
+    //
+    // 🇬🇧 Must be implemented a couple of types of subtractions:
+    // 1) Scalar subtraction - subtract an element frp, all entries.
+    // Parameter: element is the element to subtract entry-wise.
+    // Return is the value of the minus operation.
+    //
+    // 2) Performs a subtraction operation and returns the result.
+    // Parameter: element is the element to subtract with.
+    // Return is the value of the subtraction.
     Sub +
 
-    /* *
-     * @brief Скалярное умножение - перемножение всех записей.
-     *
-     * @param &element - элемент, который нужно умножить на знаковое целое.
-     * @return - возвращаемое значение операции умножения.
-     * 
-     * 
-     * @brief Scalar multiplication - multiply all entries.
-     *
-     * @param &element is the element to multiply entry-wise.
-     * @return is the return value of the times operation.
-    */
-
-    /* *
-     * @brief Выполняет операцию умножения и возвращает результат.
-     *
-     * @param &element - элемент для умножения.
-     * @return - результат умножения.
-     * 
-     * 
-     * @brief Performs a multiplication operation and returns the result.
-     *
-     * @param &element is the element to multiply with.
-     * @return is the result of the multiplication.
-    */
-
-
-    /* *
-     * @brief Скалярное умножение - умножение на знаковое целое число
-     *
-     * @param &element - элемент, который нужно умножить на знаковое целое.
-     * @return - возвращаемое значение операции умножения.
-     * 
-     * 
-     * @brief Scalar multiplication - multiply by a signed integer
-     *
-     * @param &element is the element to multiply entry-wise.
-     * @return is the return value of the times operation.
-    */
+    // 🇷🇺 Должно быть реализовано несколько вариантов:
+    //
+    // 1) Скалярное умножение - перемножение всех записей.
+    // Параметр: element - элемент, который нужно умножить на знаковое целое.
+    // Результат: возвращаемое значение операции умножения.
+    //
+    // 2) Выполняет операцию умножения и возвращает результат.
+    // Параметр: element - элемент для умножения.
+    // Результат: значение умножения.
+    //
+    // 🇬🇧 Must be a couple of implementations:
+    //
+    // 1) Scalar multiplication - multiply all entries.
+    // Parameter: element is the element to multiply entry-wise.
+    // Return is the value of the times operation.
+    //
+    // 2) Performs a multiplication operation and returns the result.
+    // Parameter: element is the element to multiply with.
+    // Return is the value of the multiplication.
     Mul +
 
-    /* *
-     * @brief Выполняет операцию += с BigInteger и возвращает результат.
-     *
-     * @param &element - элемент для добавления.
-     * @return - результат сложения.
-     * 
-     * 
-     * @brief Performs += operation with a BigInteger and returns the result.
-     *
-     * @param &element is the element to add
-     * @return is the result of the addition.
-    */
-    /* *
-     * @brief Выполняет операцию сложения и возвращает результат.
-     *
-     * @param &element - элемент для добавления.
-     * @return - результат сложения.
-     * 
-     * 
-     * @brief Performs an addition operation and returns the result.
-     *
-     * @param &element is the element to add
-     * @return is the result of the addition.
-    */
+    // 🇷🇺 Должно быть реализовано несколько вариантов:
+    //
+    // 1) Выполняет операцию += с BigInteger и возвращает результат.
+    // Параметр: element - элемент для добавления.
+    // Результат: результат сложения.
+    //
+    // 2) Выполняет операцию сложения и возвращает результат.
+    // Параметр: element - элемент для добавления.
+    // Результат: значение сложения.
+    //
+    // 🇬🇧 Must be a couple of implementations:
+    //
+    // 1) Performs += operation with a BigInteger and returns the result.
+    // Parameter: element is the element to add
+    // Return is the value of the addition.
+    //
+    // 2) Performs an addition operation and returns the result.
+    // Parameter: element is the element to add
+    // Return is the value of the addition.
     AddAssign +
 
-    /* *
-     * @brief Выполняет операцию -= с BigInteger и возвращает результат.
-     *
-     * @param &element - элемент для вычитания.
-     * @return - результат сложения.
-     * 
-     * 
-     * @brief Performs -= operation with a BigInteger and returns the result.
-     *
-     * @param &element is the element to subtract
-     * @return is the result of the addition.
-    */
-    /* *
-     * @brief Выполняет операцию вычитания и возвращает результат.
-     *
-     * @param &element - элемент для вычитания.
-     * @return - результат сложения.
-     * 
-     * 
-     * @brief Performs an subtraction operation and returns the result.
-     *
-     * @param &element is the element to subtract
-     * @return is the result of the addition.
-    */
+    // 🇷🇺 Должно быть реализовано несколько вариантов:
+    //
+    // 1) Выполняет операцию -= с BigInteger и возвращает результат.
+    // Параметр: element - элемент для вычитания.
+    // Результат: значение сложения.
+    //
+    // 2) Выполняет операцию вычитания и возвращает результат.
+    // Параметр: element - элемент для вычитания.
+    // Результат: значение сложения.
+    //
+    // 🇬🇧 Must be a couple of implementations:
+    //
+    // 1) Performs -= operation with a BigInteger and returns the result.
+    // Parameter: element is the element to subtract
+    // Return is the value of the addition.
+    //
+    // 2) Performs an subtraction operation and returns the result.
+    // Parameter: element is the element to subtract
+    // Return is the value of the addition.
     SubAssign +
 
-    /* *
-     * @brief Выполняет операцию *= с BigInteger и возвращает результат.
-     *
-     * @param &element - элемент, на который нужно умножить.
-     * @return - результат умножения.
-     * 
-     * 
-     * @brief Performs *= operation with a BigInteger and returns the result.
-     *
-     * @param &element is the element to multiply by
-     * @return is the result of the multiplication.
-    */
-    /* *
-     * @brief Выполняет операцию умножения и возвращает результат.
-     *
-     * @param &element - элемент, на который нужно умножить.
-     * @return - результат умножения.
-     * 
-     * 
-     * @brief Performs an multiplication operation and returns the result.
-     *
-     * @param &element is the element to multiply by
-     * @return is the result of the multiplication.
-    */
+    // 🇷🇺 Должно быть реализовано несколько вариантов:
+    //
+    // 1) Выполняет операцию *= с BigInteger и возвращает результат.
+    // Параметр: element - элемент, на который нужно умножить.
+    // Результат: значение умножения.
+    //
+    // 2) Выполняет операцию умножения и возвращает результат.
+    //
+    // Параметр: element - элемент, на который нужно умножить.
+    // Результат: значение умножения.
+    //
+    // 🇬🇧 Must be a couple of implementations:
+    //
+    // 1) Performs *= operation with a BigInteger and returns the result.
+    // Parameter: element is the element to multiply by
+    // Return is the value of the multiplication.
+    //
+    // 2) Performs an multiplication operation and returns the result.
+    // Parameter: element is the element to multiply by
+    // Return is the value of the multiplication.
     MulAssign +
 
     // 🇷🇺 Получение значения в элементе по индексу. Это реализовано только для некоторых 
     // производных объектов, поэтому по умолчанию  выбрасывается исключение.
-    // 🇬🇧  Gets the Value in the Element that is At Index and returns it.
+    // 🇬🇧 Gets the Value in the Element that is At Index and returns it.
     // This is only implemented for some derived classes, so the default implementation 
     // throws an exception
     Index<Idx> + IndexMut<Idx>
@@ -254,9 +215,6 @@ pub trait ILElement<Idx>:
     type Element;
     type VecType;
     type IntType;
-
-
-    // TODO: Заменить на стандартный трейт Clone
 
     /// 🇷🇺 Клонирование объекта, но чтобы он ничего не содержал
     /// 🇬🇧 Clone the object, but have it contain nothing
