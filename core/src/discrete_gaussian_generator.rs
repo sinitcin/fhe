@@ -62,6 +62,9 @@ pub struct DiscreteGaussianGenerator<VecType: VectorType> {
 }
 
 impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
+
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief         Basic constructor for specifying distribution parameter and
      * modulus.
@@ -81,6 +84,8 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         }
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief Check if the gaussian generator has been initialized with a standard deviation
      */
@@ -88,6 +93,8 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         !self.m_vals.is_empty()
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief Initializes the generator.
      */
@@ -95,6 +102,8 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         // Implement initialization logic here
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief  Returns the standard deviation of the generator.
      * @return The analytically obtained standard deviation of the generator.
@@ -103,6 +112,8 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         self.m_std
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief     Sets the standard deviation of the generator.
      * @param std The analytic standard deviation of the generator.
@@ -111,6 +122,8 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         self.m_std = std;
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief      Returns a generated signed integer. Uses Peikert's Inversion
      * Method
@@ -121,6 +134,8 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         0
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief      Returns a generated integer vector. Uses Peikert's inversion
      * method.
@@ -133,6 +148,8 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         vec![0; size as usize]
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief  Returns a generated integer. Uses Peikert's inversion method.
      * @return A random value within this Discrete Gaussian Distribution.
@@ -142,6 +159,8 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         VecType::Integer::zero()
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief           Generates a vector of random values within this Discrete
      * Gaussian Distribution. Uses Peikert's inversion method.
@@ -156,6 +175,8 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         VecType::zero(size as usize)
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief  Returns a generated integer. Uses rejection method.
      * @param mean center of discrete Gaussian distribution.
@@ -175,6 +196,9 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         VecType::Integer::zero()
     }
 
+
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief  Returns a generated integer. Uses rejection method.
      * @param mean center of discrete Gaussian distribution.
@@ -196,6 +220,9 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
     // int32_t GenerateInt32 (double mean, double stddev);
     // will be defined later
 
+
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief Returns a generated integer. Uses Karney's method defined as
      * Algorithm D in https://arxiv.org/pdf/1303.6257.pdf
@@ -208,19 +235,27 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         0
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     pub fn find_in_vector(&self, s: &[f64], search: f64) -> u32 {
         // Implement find_in_vector method here
         0
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     pub fn unnormalized_gaussian_pdf(mean: f64, sigma: f64, x: i32) -> f64 {
         E.powf(-((x as f64 - mean).powi(2) / (2.0 * sigma * sigma)))
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     pub fn unnormalized_gaussian_pdf_optimized(mean: f64, sigma_factor: f64, x: i32) -> f64 {
         E.powf(sigma_factor * (x as f64 - mean).powi(2))
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief Subroutine used by Karney's Method to accept an integer with
      * probability exp(-n/2).
@@ -233,6 +268,8 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         false
     }
 
+    /// 🇷🇺 
+    /// 🇬🇧 
     /**
      * @brief Subroutine used by Karney's Method to generate an integer with
      * probability exp(-k/2)(1 - exp(-1/2)).
@@ -244,48 +281,81 @@ impl<VecType: VectorType> DiscreteGaussianGenerator<VecType> {
         0
     }
 
-    /**
-     * @brief Generates a Bernoulli random value H which is true with probability
-     * exp(-1/2).
-     * @param g Mersenne Twister Engine used for uniform deviates
-     * @return Bernoulli random value H
-     */
+    /// 🇷🇺 Генерирует случайную величину Бернулли H, которая истинна с вероятностью exp(-1/2).
+    /// 
+    /// Параметры:
+    /// g (Вихрь Мерсенна)[https://ru.wikipedia.org/wiki/Вихрь_Мерсенна] используется для равномерных отклонений
+    /// 
+    /// Результат: Случайная величина Бернулли H
+    /// 
+    /// 🇬🇧 Generates a Bernoulli random value H which is true with probability exp(-1/2).
+    /// 
+    /// Parameters:
+    /// 
+    /// g Mersenne Twister Engine used for uniform deviates
+    /// 
+    /// Result: Bernoulli random value H
     pub fn algorithm_h(g: &mut ThreadRng) -> bool {
         // Implement AlgorithmH here
         false
     }
 
-    /**
-     * @brief Generates a Bernoulli random value H which is true with probability
-     * exp(-1/2). Uses double precision.
-     * @param g Mersenne Twister Engine used for uniform deviates
-     * @return Bernoulli random value H
-     */
+    /// 🇷🇺 Генерирует случайную величину Бернулли H, которая истинна с вероятностью exp(-1/2). Используется двойная точность.
+    /// 
+    /// Параметры:
+    /// g (Вихрь Мерсенна)[https://ru.wikipedia.org/wiki/Вихрь_Мерсенна] используется для равномерных отклонений
+    /// 
+    /// Результат: Случайная величина Бернулли H
+    /// 
+    /// 🇬🇧 Generates a Bernoulli random value H which is true with probability exp(-1/2). Uses double precision.
+    /// 
+    /// Parameters: g Mersenne Twister Engine used for uniform deviates
+    /// 
+    /// Result: Bernoulli random value H
     pub fn algorithm_h_double(g: &mut ThreadRng) -> bool {
         // Implement AlgorithmHDouble here
         false
     }
 
-    /**
-     * @brief Bernoulli trial with probability exp(-x(2k + x)/(2k + 2)).
-     * @param g Mersenne Twister Engine used for uniform deviates
-     * @param k Deviate k used for calculations
-     * @param x Deviate x used for calculations
-     * @return Whether the number of runs are even or not
-     */
+    /// 🇷🇺 Метод Бернулли с вероятностью exp(-x(2k + x)/(2k + 2)). Используется двойная точность.
+    /// 
+    /// Параметры:
+    /// g (Вихрь Мерсенна)[https://ru.wikipedia.org/wiki/Вихрь_Мерсенна] используется для равномерных отклонений
+    /// Отклонение k, используемое для расчетов
+    /// Отклонение x, используемое для расчетов
+    /// 
+    /// Результат: Четное или нечетное количество прогонов
+    /// 
+    /// 🇬🇧 Bernoulli trial with probability exp(-x(2k + x)/(2k + 2)). Uses double precision.
+    /// 
+    /// Parameters:
+    /// g Mersenne Twister Engine used for uniform deviates
+    /// k Deviate k used for calculations
+    /// x Deviate x used for calculations
+    /// 
+    /// Return Whether the number of runs are even or not
     pub fn algorithm_b(g: &mut ThreadRng, k: i32, x: f64) -> bool {
         // Implement AlgorithmB here
         false
     }
 
-    /**
-     * @brief Bernoulli trial with probability exp(-x(2k + x)/(2k + 2)). Uses
-     * double precision.
-     * @param g Mersenne Twister Engine used for uniform deviates
-     * @param k Deviate k used for calculations
-     * @param x Deviate x used for calculations
-     * @return Whether the number of runs are even or not
-     */
+    /// 🇷🇺 Метод Бернулли с вероятностью exp(-x(2k + x)/(2k + 2)). Используется двойная точность.
+    /// 
+    /// Параметры:
+    /// g (Вихрь Мерсенна)[https://ru.wikipedia.org/wiki/Вихрь_Мерсенна] используется для равномерных отклонений
+    /// Отклонение k, используемое для расчетов
+    /// Отклонение x, используемое для расчетов
+    /// 
+    /// Результат: Четное или нечетное количество прогонов
+    /// 
+    /// 🇬🇧 Bernoulli trial with probability exp(-x(2k + x)/(2k + 2)). Uses double precision.
+    /// 
+    /// Parameters:
+    /// g Mersenne Twister Engine used for uniform deviates
+    /// k Deviate k used for calculations
+    /// x Deviate x used for calculations
+    /// 
+    /// Return Whether the number of runs are even or not
     pub fn algorithm_b_double(g: &mut ThreadRng, k: i32, x: f64) -> bool {
         // Implement AlgorithmBDouble here
         false
