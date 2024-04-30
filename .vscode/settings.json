@@ -37,6 +37,7 @@
         "HPSOVERQ",
         "HPSPOVERQ",
         "HPSPOVERQLEVELED",
+        "KARNEY",
         "keyswitch",
         "linalg",
         "multiprecision",
@@ -53,6 +54,7 @@
         "totient",
         "TPOC",
         "Ubint",
+        "unnormalized",
         "Zucca"
     ]
 }
