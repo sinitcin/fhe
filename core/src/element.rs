@@ -38,11 +38,11 @@
 
 use std::ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 
+use crate::types::Format;
+
 pub struct DiscreteGaussianGeneratorImpl<X> {
     _phantom: std::marker::PhantomData<X>,
 }
-
-pub struct Format;
 
 /// 🇷🇺 Интерфейс для идеальных решеток
 ///
