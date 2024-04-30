@@ -32,140 +32,178 @@
 //==================================================================================
 
 /*
-  base class for parameters for a lattice element
- */
+    🇷🇺 Базовый объект для параметров элемента решетки
+    🇬🇧 Base class for parameters for a lattice element
+*/
 
-use std::fmt;
-use serde::{Serialize, Deserialize};
-use std::default::Default;
+use serde::{Deserialize, Serialize};
 use std::clone::Clone;
+use std::default::Default;
+use std::fmt::{Debug, Display, Formatter};
 
-/**
- * @class ElemParams
- * @file elemparams.h
- * @brief Wrapper class to hold the parameters for Element types and their
- * inheritors.
- */
-#[derive(Serialize, Deserialize)]
-pub struct ElemParams<IntegerType: Default + Clone> {
-    m_ringDimension: u32,
-    m_cyclotomicOrder: u32,
-    m_ciphertextModulus: IntegerType,
-    m_rootOfUnity: IntegerType,
-    m_bigCiphertextModulus: IntegerType,
-    m_bigRootOfUnity: IntegerType,
+/// 🇷🇺 Объект-обертка для хранения параметров Element
+/// 🇬🇧 Wrapper class to hold the parameters for Element types and their inheritors
+#[derive(Serialize, Deserialize, Eq, PartialEq, Clone)]
+pub struct ElemParams<IntegerType>
+where
+    IntegerType: Default + Clone,
+    
+{
+    m_ring_dimension: u32,
+    m_cyclotomic_order: u32,
+    m_ciphertext_modulus: IntegerType,
+    m_root_of_unity: IntegerType,
+    m_big_ciphertext_modulus: IntegerType,
+    m_big_root_of_unity: IntegerType,
 }
 
-impl<IntegerType> ElemParams<IntegerType> {
-    pub fn new(order: u32, ctModulus: IntegerType) -> Self {
-        let ringDimension = Self::get_totient(order);
+impl<IntegerType> ElemParams<IntegerType>
+where
+    IntegerType: Default + Clone,
+{
+
+    /// 🇷🇺 Простые методы-конструкторы, которые принимают на вход 
+    /// - корень из единственного числа
+    /// - большой корень из единственного числа
+    /// - циклотомический порядок
+    /// - модуль шифртекста и модуль большого шифртекста
+    /// Используется для операций побитовой упаковки.
+    /// Параметры:
+    /// * order - циклотомический порядок, обернутый набором параметров.
+    /// * ctModulus - модуль шифртекста, обернутый набором параметров.
+    /// * rUnity - к корень из единственного числа.
+    /// * bigCtModulus - большой модуль шифртекста, используемый для упаковки битовых операций.
+    /// * bigRUnity - большой корень из единства, используемый для операций упаковки битов.
+    /// 
+    /// 🇬🇧 Simple constructor method that takes as input root of unity, big root of unity, 
+    /// cyclotomic order and the ciphertext modulus and big ciphertext Modulus.
+    /// This is used for bit-packing operations.
+    /// Parameters:
+    /// * order the cyclotomic order wrapped by the parameter set.
+    /// * ctModulus the ciphertext modulus wrapped by the parameter set.
+    /// * rUnity the root of unity.
+    /// * bigCtModulus the big ciphertext modulus used for bit packing operations.
+    /// * bigRUnity the big root of unity used for bit packing operations.
+
+    pub fn new(cyclotomic_order: u32, ciphertext_modulus: IntegerType) -> Self {
+        let ring_dimension = Self::get_totient(cyclotomic_order);
         ElemParams {
-            m_ringDimension: ringDimension,
-            m_cyclotomicOrder: order,
-            m_ciphertextModulus: ctModulus,
-            m_rootOfUnity: IntegerType::default(),
-            m_bigCiphertextModulus: IntegerType::default(),
-            m_bigRootOfUnity: IntegerType::default(),
+            m_ring_dimension: ring_dimension,
+            m_cyclotomic_order: cyclotomic_order,
+            m_ciphertext_modulus: ciphertext_modulus,
+            m_root_of_unity: IntegerType::default(),
+            m_big_ciphertext_modulus: IntegerType::default(),
+            m_big_root_of_unity: IntegerType::default(),
         }
     }
 
-    pub fn new_with_runity(order: u32, ctModulus: IntegerType, rUnity: IntegerType) -> Self {
-        let ringDimension = Self::get_totient(order);
+    /// 🇷🇺 Предыдущее название: `new_with_runity`
+    /// 🇬🇧 The previous name is `new_with_runity`
+    pub fn new_with_root_of_unity(
+        cyclotomic_order: u32,
+        ciphertext_modulus: IntegerType,
+        root_of_unity: IntegerType,
+    ) -> Self {
+        let ring_dimension = Self::get_totient(cyclotomic_order);
         ElemParams {
-            m_ringDimension: ringDimension,
-            m_cyclotomicOrder: order,
-            m_ciphertextModulus: ctModulus,
-            m_rootOfUnity: rUnity,
-            m_bigCiphertextModulus: IntegerType::default(),
-            m_bigRootOfUnity: IntegerType::default(),
+            m_ring_dimension: ring_dimension,
+            m_cyclotomic_order: cyclotomic_order,
+            m_ciphertext_modulus: ciphertext_modulus,
+            m_root_of_unity: root_of_unity,
+            m_big_ciphertext_modulus: IntegerType::default(),
+            m_big_root_of_unity: IntegerType::default(),
         }
     }
 
-    pub fn new_with_big_modulus(order: u32, ctModulus: IntegerType, rUnity: IntegerType, bigCtModulus: IntegerType, bigRUnity: IntegerType) -> Self {
-        let ringDimension = Self::get_totient(order);
+    pub fn new_with_big_modulus(
+        cyclotomic_order: u32,
+        ciphertext_modulus: IntegerType,
+        root_of_unity: IntegerType,
+        big_ciphertext_modulus: IntegerType,
+        big_root_of_unity: IntegerType,
+    ) -> Self {
+        let ring_dimension = Self::get_totient(cyclotomic_order);
         ElemParams {
-            m_ringDimension: ringDimension,
-            m_cyclotomicOrder: order,
-            m_ciphertextModulus: ctModulus,
-            m_rootOfUnity: rUnity,
-            m_bigCiphertextModulus: bigCtModulus,
-            m_bigRootOfUnity: bigRUnity,
+            m_ring_dimension: ring_dimension,
+            m_cyclotomic_order: cyclotomic_order,
+            m_ciphertext_modulus: ciphertext_modulus,
+            m_root_of_unity: root_of_unity,
+            m_big_ciphertext_modulus: big_ciphertext_modulus,
+            m_big_root_of_unity: big_root_of_unity,
         }
     }
 
+    /// 🇷🇺 Простой метод получения циклотомического порядка.
+    /// 🇬🇧 Simple getter method for cyclotomic order.
     pub fn get_cyclotomic_order(&self) -> u32 {
-        self.m_cyclotomicOrder
+        self.m_cyclotomic_order
     }
 
+    /// 🇷🇺 Простой метод получения размерности кольца. Размерность кольца - это оценка функции Эйлера циклотомического порядка.
+    /// 🇬🇧 Simple ring dimension getter method. The ring dimension is the evaluation of the totient function of the cyclotomic order.
     pub fn get_ring_dimension(&self) -> u32 {
-        self.m_ringDimension
+        self.m_ring_dimension
     }
 
+    /// 🇷🇺 Простой метод получения модуля шифртекста, а не большого модуля шифртекста.
+    /// 🇬🇧 Simple getter method for the ciphertext modulus, not the big ciphertext modulus.
     pub fn get_modulus(&self) -> &IntegerType {
-        &self.m_ciphertextModulus
+        &self.m_ciphertext_modulus
     }
 
+    /// 🇷🇺 Простой метод получения большого модуля шифротекста. Это актуально не для всех приложений.
+    /// 🇬🇧 Simpler getter method for the big ciphertext modulus. This is not relevant for all applications.
     pub fn get_big_modulus(&self) -> &IntegerType {
-        &self.m_bigCiphertextModulus
+        &self.m_big_ciphertext_modulus
     }
 
+    /// 🇷🇺 Простой метод получения корня из единицы (не путать с большим корнем из единицы).
+    /// 🇬🇧 Simple getter method for the root of unity, not the big root of unity.
     pub fn get_root_of_unity(&self) -> &IntegerType {
-        &self.m_rootOfUnity
+        &self.m_root_of_unity
     }
 
+    /// 🇷🇺 Получение большого корня из единицы
+    /// 🇬🇧 Simple getter method for the big root of unity.
     pub fn get_big_root_of_unity(&self) -> &IntegerType {
-        &self.m_bigRootOfUnity
+        &self.m_big_root_of_unity
     }
 
-    fn get_totient(order: u32) -> u32 {
+    /// 🇷🇺 Функция Эйлера
+    /// 🇬🇧 Totient function
+    fn get_totient(_cyclotomic_order: u32) -> u32 {
         // TODO: Implement GetTotient function
         unimplemented!()
     }
 }
 
-impl<IntegerType: fmt::Debug> fmt::Debug for ElemParams<IntegerType> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "[m={} n={} q={} ru={} bigq={} bigru={}]", self.m_cyclotomicOrder, self.m_ringDimension, self.m_ciphertextModulus, self.m_rootOfUnity, self.m_bigCiphertextModulus, self.m_bigRootOfUnity)
+impl<IntegerType> Debug for ElemParams<IntegerType>
+where
+    IntegerType: Default + Debug + Clone + Display,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[m={} n={} q={} ru={} bigq={} bigru={}]",
+            self.m_cyclotomic_order,
+            self.m_ring_dimension,
+            self.m_ciphertext_modulus,
+            self.m_root_of_unity,
+            self.m_big_ciphertext_modulus,
+            self.m_big_root_of_unity
+        )
     }
 }
 
-impl<IntegerType> PartialEq for ElemParams<IntegerType> {
-    fn eq(&self, other: &Self) -> bool {
-        self.m_ringDimension == other.m_ringDimension &&
-        self.m_cyclotomicOrder == other.m_cyclotomicOrder &&
-        self.m_ciphertextModulus == other.m_ciphertextModulus &&
-        self.m_rootOfUnity == other.m_rootOfUnity &&
-        self.m_bigCiphertextModulus == other.m_bigCiphertextModulus &&
-        self.m_bigRootOfUnity == other.m_bigRootOfUnity
-    }
-}
-
-impl<IntegerType> Eq for ElemParams<IntegerType> {}
-
-impl<IntegerType> Clone for ElemParams<IntegerType> {
-    fn clone(&self) -> Self {
-        ElemParams {
-            m_ringDimension: self.m_ringDimension,
-            m_cyclotomicOrder: self.m_cyclotomicOrder,
-            m_ciphertextModulus: self.m_ciphertextModulus.clone(),
-            m_rootOfUnity: self.m_rootOfUnity.clone(),
-            m_bigCiphertextModulus: self.m_bigCiphertextModulus.clone(),
-            m_bigRootOfUnity: self.m_bigRootOfUnity.clone(),
-        }
-    }
-}
-
-impl<IntegerType: Clone> Default for ElemParams<IntegerType> {
+impl<IntegerType: Default + Clone> Default for ElemParams<IntegerType> {
     fn default() -> Self {
         ElemParams {
-            m_ringDimension: 0,
-            m_cyclotomicOrder: 0,
-            m_ciphertextModulus: IntegerType::default(),
-            m_rootOfUnity: IntegerType::default(),
-            m_bigCiphertextModulus: IntegerType::default(),
-            m_bigRootOfUnity: IntegerType::default(),
+            m_ring_dimension: 0,
+            m_cyclotomic_order: 0,
+            m_ciphertext_modulus: IntegerType::default(),
+            m_root_of_unity: IntegerType::default(),
+            m_big_ciphertext_modulus: IntegerType::default(),
+            m_big_root_of_unity: IntegerType::default(),
         }
     }
 }
-
-

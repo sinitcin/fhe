@@ -296,7 +296,7 @@ pub trait ILElement<Idx>:
     /// Param &i is the element to perform the automorphism transform with.
     /// Param &vec a vector with precomputed indices
     /// Return is the result of the automorphism transform.
-    fn automorphism_transform_with_vec(&self, i: u32, vec: &Vec<u32>) -> Self::Element;
+    fn automorphism_transform_with_vec(&self, i: u32, vec: &[u32]) -> Self::Element;
 
     /// 🇷🇺 Транспонирование элемента кольца с помощью операции автоморфизма
     /// Результат:    результат транспонирования.
