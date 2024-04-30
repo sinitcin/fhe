@@ -47,7 +47,6 @@ use std::fmt::{Debug, Display, Formatter};
 pub struct ElemParams<IntegerType>
 where
     IntegerType: Default + Clone,
-    
 {
     m_ring_dimension: u32,
     m_cyclotomic_order: u32,
@@ -61,8 +60,7 @@ impl<IntegerType> ElemParams<IntegerType>
 where
     IntegerType: Default + Clone,
 {
-
-    /// 🇷🇺 Простые методы-конструкторы, которые принимают на вход 
+    /// 🇷🇺 Простые методы-конструкторы, которые принимают на вход
     /// - корень из единственного числа
     /// - большой корень из единственного числа
     /// - циклотомический порядок
@@ -74,8 +72,8 @@ where
     /// * rUnity - к корень из единственного числа.
     /// * bigCtModulus - большой модуль шифртекста, используемый для упаковки битовых операций.
     /// * bigRUnity - большой корень из единства, используемый для операций упаковки битов.
-    /// 
-    /// 🇬🇧 Simple constructor method that takes as input root of unity, big root of unity, 
+    ///
+    /// 🇬🇧 Simple constructor method that takes as input root of unity, big root of unity,
     /// cyclotomic order and the ciphertext modulus and big ciphertext Modulus.
     /// This is used for bit-packing operations.
     /// Parameters:
