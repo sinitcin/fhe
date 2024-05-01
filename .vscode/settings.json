@@ -54,6 +54,8 @@
         "Polyakov",
         "powi",
         "precomputation",
+        "precomputations",
+        "precomputes",
         "reencryption",
         "relinearization",
         "runity",
@@ -64,6 +66,7 @@
         "totient",
         "TPOC",
         "Ubint",
+        "UCSD",
         "unnormalized",
         "vals",
         "Zucca"
