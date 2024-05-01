@@ -2,7 +2,10 @@
     "cSpell.words": [
         "бутстрапинга",
         "бутстрапингом",
+        "Карни",
+        "Мерсенна",
         "многопрецизионные",
+        "Пейкерта",
         "проде",
         "реалинеаризации",
         "циклотомический",
@@ -31,6 +34,7 @@
         "FLEXIBALEAUTOEXT",
         "FLEXIBLEAUTO",
         "FLEXIBLEAUTOEXT",
+        "Gyana",
         "Halevi",
         "Hasan",
         "homomorphic",
@@ -40,10 +44,15 @@
         "KARNEY",
         "keyswitch",
         "linalg",
+        "Mersenne",
         "multiprecision",
         "ndarray",
         "NJIT",
+        "peikert",
+        "Peikert's",
         "Polyakov",
+        "powi",
+        "precomputation",
         "reencryption",
         "relinearization",
         "runity",
@@ -55,6 +64,7 @@
         "TPOC",
         "Ubint",
         "unnormalized",
+        "vals",
         "Zucca"
     ]
 }
