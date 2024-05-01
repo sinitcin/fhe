@@ -1,36 +1,91 @@
-/*
- This code provides generation of gaussian distributions of discrete values. Discrete uniform generator
- relies on the built-in C++ generator for 32-bit unsigned integers defined in <random>
-*/
+//==================================================================================
+// BSD 2-Clause License
+//
+// Copyright (c) 2014-2023, NJIT, Duality Technologies Inc. and other contributors
+//            translated from C++ and upgraded by Anton Sinitsyn
+//
+// All rights reserved.
+//
+// Author TPOC: contact@openfhe.org
+// Anton Sinitsyn: antonsinitsyn@outlook.de
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//==================================================================================
 
-/**
- * This is the header file for DiscreteGaussianGenerator class, which contains 3
- * different sampling methods.
- *
- * First sampling method implemented is the rejection sampling defined in
- * section 4.1 of https://eprint.iacr.org/2007/432.pdf. It is usable for
- * arbitrary centers and standard deviations, and does not require any form of
- * precomputation. However, it has high rejection rates and is prone to timing
- * attacks. It is not used anywhere in the library at the moment and is here for
- * historical reasons.
- *
- * Second sampling method implemented is Karney's method defined in Algorithm D
- * from https://arxiv.org/pdf/1303.6257.pdf, which is an improved method based
- * on rejection sampling. It also works for arbitrary centers and standard
- * deviations without any precomputation. Its rejection rate is smaller than in
- * the rejection sampling method but it may still be vulnerable to timing
- * attacks.
- *
- *
- * Final sampling method defined in this class is the Peikert's inversion method
- * discussed in section 4.1 of https://eprint.iacr.org/2010/088.pdf and
- * summarized in section 3.2.2 of
- * https://link.springer.com/content/pdf/10.1007%2Fs00200-014-0218-3.pdf. It
- * requires CDF tables of probabilities centered around single center to be
- * kept, which are precalculated in constructor. The method is not prone to
- * timing attacks but it is usable for single center, single deviation only.
- * It should be also noted that the memory requirement grows with the standard
- * deviation, therefore it is advised to use it with smaller deviations.   */
+/*
+    🇷🇺 Этот код обеспечивает генерацию гауссовых распределений дискретных значений. Дискретный равномерный генератор
+    опирается на генератор для 32-битных беззнаковых целых чисел, определенный в <random
+
+    Это заголовочный файл для класса DiscreteGaussianGenerator, который содержит 3 различных метода выборки.
+
+    Первый реализованный метод выборки - выборка с отклонением, определенная в разделе 4.1
+    в https://eprint.iacr.org/2007/432.pdf. Он подходит для произвольных центров и стандартных отклонений,
+    и не требует никаких предварительных вычислений. Однако он имеет высокий процент отбраковки и подвержен временным атакам.
+    В настоящее время он не используется нигде в библиотеке и приведен здесь по историческим соображениям.
+
+    Второй реализованный метод выборки - это метод Карни, определенный в алгоритме D из https://arxiv.org/pdf/1303.6257.pdf,
+    который является улучшенным методом, основанным на на выборке с отклонением. Он также работает для произвольных
+    центров и стандартных отклонений без каких-либо предварительных вычислений. Коэффициент отклонения меньше,
+    чем в метод выборки с отклонением, но он все еще может быть уязвим для атак по времени атаки.
+
+    Последним методом выборки, определенным в этом классе, является метод инверсии Пейкерта рассмотренный в разделе 4.1
+    https://eprint.iacr.org/2010/088.pdf и обобщенный в разделе 3.2.2 на
+    https://link.springer.com/content/pdf/10.1007%2Fs00200-014-0218-3.pdf. Он требует хранения таблиц CDF вероятностей,
+    которые сосредоточенных вокруг одного центра которые предварительно вычисляются в конструкторе. Метод не подвержен
+    временным атакам, но применим только для одного центра и одного отклонения.
+
+    Следует также отметить, что потребность в памяти растет с увеличением стандартного отклонением, поэтому рекомендуется
+    использовать его при меньших отклонениях.
+
+    🇬🇧 This code provides generation of gaussian distributions of discrete values. Discrete uniform generator
+    relies on generator for 32-bit unsigned integers defined in <random>
+
+    This is the header file for DiscreteGaussianGenerator class, which contains 3
+    different sampling methods.
+
+    First sampling method implemented is the rejection sampling defined in
+    section 4.1 of https://eprint.iacr.org/2007/432.pdf. It is usable for
+    arbitrary centers and standard deviations, and does not require any form of
+    precomputation. However, it has high rejection rates and is prone to timing
+    attacks. It is not used anywhere in the library at the moment and is here for
+    historical reasons.
+
+    Second sampling method implemented is Karney's method defined in Algorithm D
+    from https://arxiv.org/pdf/1303.6257.pdf, which is an improved method based
+    on rejection sampling. It also works for arbitrary centers and standard
+    deviations without any precomputation. Its rejection rate is smaller than in
+    the rejection sampling method but it may still be vulnerable to timing
+    attacks.
+
+    Final sampling method defined in this class is the Peikert's inversion method
+    discussed in section 4.1 of https://eprint.iacr.org/2010/088.pdf and
+    summarized in section 3.2.2 of
+    https://link.springer.com/content/pdf/10.1007%2Fs00200-014-0218-3.pdf. It
+    requires CDF tables of probabilities centered around single center to be
+    kept, which are precalculated in constructor. The method is not prone to
+    timing attacks but it is usable for single center, single deviation only.
+    It should be also noted that the memory requirement grows with the standard
+    deviation, therefore it is advised to use it with smaller deviations.
+*/
 
 pub const KARNEY_THRESHOLD: f64 = 300.0;
 
