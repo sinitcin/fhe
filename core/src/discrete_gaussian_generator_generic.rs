@@ -32,71 +32,122 @@
 //==================================================================================
 
 /*
- This code provides generation of gaussian distributions of discrete values. Discrete uniform generator
- relies on the built-in C++ generator for 32-bit unsigned integers defined in <random>
-*/
+    🇷🇺 Этот код обеспечивает генерацию гауссовых распределений дискретных значений.
+    Генератор дискретных равномерных распределений опирается на встроенный в C++ генератор 32-битных
+    беззнаковых целых чисел, определенный в <random
 
-/*This is the header file for the Generic Sampler used for various Discrete
- * Gaussian Sampling applications. This class implements the generic sampler by
- * UCSD discussed in the https://eprint.iacr.org/2017/259.pdf and it is heavily
- * based on Michael Walter's original code. Along the sides of the
- * implementation there are also two different "base samplers", which are used
- * for the generic sampler or can be used on their own depending on the
- * requirements of needed application.
- *
- * The first base sampler uses Peikert's inversion method, discussed in
- * section 4.1 of https://eprint.iacr.org/2010/088.pdf and summarized in
- * section 3.2.2 of
- * https://link.springer.com/content/pdf/10.1007%2Fs00200-014-0218-3.pdf.
- * Peikert's method requires precomputation of CDF tables around a specific
- * center and the table must be kept during the sampling process. Hence,
- * Peikert's method works best if the DESIRED STANDARD DEVIATION IS SMALL and
- * THE MEAN OF THE DISTRIBUTION IS FIXED, as each new center will require a new
- * set of precomputations.
- *
- * Second base sampler is  the Knuth-Yao Sampler discussed in section 5 of
- * https://link.springer.com/content/pdf/10.1007%2Fs00200-014-0218-3.pdf .
- * Similar to Peikert's, Knuth-Yao precomputes the PDF's of the numbers based on
- * standard deviation and the center, which is used during the sampling process.
- * Therefore like Peikert's method,  Knuth-Yao works best method works best if
- * the DESIRED STANDARD DEVIATION IS SMALL and THE MEAN OF THE DISTRIBUTION IS
- * FIXED, as each new center will require a new set of precomputations, just
- * like Peikert's inversion method.
- *
- * The "generic sampler" on the other hand, works independent from standard
- * deviation of the distribution. It combines an array of previously discussed
- * base samplers centered around 0 to (2^b-1) / 2^b through convolution. The
- * tables of base samplers however, must be precomputed beforehand; but they do
- * not need to be recalculated at any time of the sampling process. It is USABLE
- * FOR ANY STANDARD DEVIATION AND MEAN, just like Karney's method defined in
- * discretegaussiangenerator.h, needs only one single precomputation and is not
- * prone to timing attacks unlike Karney. Karney's method, however, is faster
- * than the generic sampler.
- *
- * PARAMETER SELECTION FOR GENERIC SAMPLER
- *
- * The selection of parameters change the run time/memory usage/precision of the
- * generic sampler. The triple trade off between these parameters are defined in
- * the equation k = (PRECISION - FLIPS) / LOG_BASE. k denotes the level of
- * precision of the generic sampler. Higher the k is, higher the precision of
- * the generic sampler but higher the run time. PRECISION denotes the number of
- * decimal bits in the center of the distribution. Since we are using 'double'
- * for mean, it is fixed to 53 by definition. FLIPS denote the number of
- * Bernoulli flips used to approximate the bits used in combination of base
- * sampler. Higher the number of flips, larger the number of bits approximated
- * rather than calculated which means smaller run times. Generic sampler
- * requires a set of base samplers centered around 0/2^b to (2^b-1)/2^b;
- * LOG_BASE denotes b in this equation. Higher the LOG_BASE is, more base
- * samplers required which requires additional memory; but at the same time
- * smaller run times.
- *
- * The base samplers used in generic sampler requires varying centers between
- * 0/2^b and (2^b-1)/(2^b) with the same standard deviation. The standard
- * deviation required for base samplers must satisfy SIGMA>=4*SQRT(2)*N, where
- * sigma is the standard deviation of the base sampler and N is the smoothing
- * parameter
- *
- * */
+    Это файл для Generic Sampler, используемого для различных задач дискретной гауссовой выборки. 
+    Этот класс реализует общий сэмплер от UCSD, о котором говорилось в https://eprint.iacr.org/2017/259.pdf,
+    и он в значительной степени основан на оригинальном коде Майкла Уолтера. 
+    Также есть два различных «базовых сэмплера», которые используются для общего семплера или могут быть 
+    использованы самостоятельно в зависимости от требований задачи.
+
+    Первый базовый сэмплер использует метод инверсии Пейкерта, рассмотренный в разделе 4.1 на сайте
+    https://eprint.iacr.org/2010/088.pdf и обобщенный в разделе 3.2.2 на сайте
+    https://link.springer.com/content/pdf/10.1007%2Fs00200-014-0218-3.pdf.
+    Метод Пейкерта требует предварительного вычисления таблицы CDF вокруг определенного центра, и эта таблица
+    должна сохраняться в процессе выборки. Следовательно, Метод Пейкерта лучше всего работает,
+    если желаемое стандартное отклонение невелико, а среднее значение распределения фиксировано,
+    поскольку каждый новый центр требует нового набора предварительных вычислений.
+
+    Второй базовый сэмплер - сэмплер Кнута-Яо, рассмотренный в разделе 5 
+    https://link.springer.com/content/pdf/10.1007%2Fs00200-014-0218-3.pdf.
+    Подобно методу Пейкерта, Кнут-Яо предварительно вычисляет PDF чисел на основе стандартного отклонения и центра, 
+    которые используются в процессе выборки.
+    Поэтому, как и метод Пейкерта, метод Кнута-Яо работает лучше всего, если желаемое стандартное отклонение невелико,
+    а среднее значение распределения фиксировано, поскольку каждый новый центр потребует нового набора предварительных
+    вычислений, как и в методе инверсии Пейкерта.)
+
+    С другой стороны, «общий сэмплер» работает независимо от стандартного отклонения распределения.
+    Он объединяет массив ранее рассмотренных базовых сэмплов, центрированных вокруг от 0 до (2^b-1) / 2^b,
+    посредством свертки. Таблицы базовых выборок, однако, должны быть вычислены заранее, но их не нужно
+    пересчитывать в любой момент процесса выборки. Метод USABLE FOR ANY STANDARD DEVIATION AND MEAN, как и метод Карни,
+    определенный в discrete_gaussian_generator.rs, требует только одного предварительного вычисления и не подвержен 
+    атакам по времени, в отличие от Карни. Метод Карни, однако, быстрее, чем общий сэмплер.
+
+    ПОДБОР ПАРАМЕТРОВ ДЛЯ ОБЩЕГО СЭМПЛЕРА
+
+    Выбор параметров изменяет время работы/затраты памяти/точность общего сэмплера. Тройной компромисс между 
+    этими параметрами определяется уравнением k = (PRECISION - FLIPS) / LOG_BASE. k обозначает уровень точности
+    общего семплера. Чем выше k, тем выше точность общего сэмплера, но выше и время работы.
+    PRECISION  обозначает количество десятичных битов в центре распределения. Поскольку мы используем 
+    'double' для среднего значения, оно по определению равно 53. 
+    FLIPS обозначает количество подбрасываний Бернулли (по аналогии с монеткой), используемых для аппроксимации битов, 
+    используемых в комбинации базового сэмплера. Чем больше число подбрасываний, тем большее количество битов 
+    аппроксимируется, а не вычисляется, что означает меньшее время работы. Общий сэмплер требует набора базовых
+    сэмплеров, расположенных в диапазоне от 0/2^b до (2^b-1)/2^b;
+    LOG_BASE обозначает b в этом уравнении. При большем значении LOG_BASE требуется больше базовых семплов, 
+    что требует дополнительной памяти, но в то же время уменьшает время выполнения.
+
+    Базовые сэмплы, используемые в общем сэмплере, требуют варьирования центров между 0/2^b и (2^b-1)/(2^b) 
+    с одинаковым стандартным отклонением. Стандартное отклонение, требуемое для базовых выборок, должно 
+    удовлетворять SIGMA>=4*SQRT(2)*N, где sigma - стандартное отклонение базовой выборки, а N - параметр сглаживания
+    
+
+    🇬🇧 This code provides generation of gaussian distributions of discrete values. Discrete uniform generator
+    relies on the built-in C++ generator for 32-bit unsigned integers defined in <random>
+
+    This is the header file for the Generic Sampler used for various Discrete
+    Gaussian Sampling applications. This class implements the generic sampler by
+    UCSD discussed in the https://eprint.iacr.org/2017/259.pdf and it is heavily
+    based on Michael Walter's original code. Along the sides of the
+    implementation there are also two different "base samplers", which are used
+    for the generic sampler or can be used on their own depending on the
+    requirements of needed application.
+
+    The first base sampler uses Peikert's inversion method, discussed in
+    section 4.1 of https://eprint.iacr.org/2010/088.pdf and summarized in
+    section 3.2.2 of
+    https://link.springer.com/content/pdf/10.1007%2Fs00200-014-0218-3.pdf.
+    Peikert's method requires precomputation of CDF tables around a specific
+    center and the table must be kept during the sampling process. Hence,
+    Peikert's method works best if the DESIRED STANDARD DEVIATION IS SMALL and
+    THE MEAN OF THE DISTRIBUTION IS FIXED, as each new center will require a new
+    set of precomputations.
+
+    Second base sampler is  the Knuth-Yao Sampler discussed in section 5 of
+    https://link.springer.com/content/pdf/10.1007%2Fs00200-014-0218-3.pdf .
+    Similar to Peikert's, Knuth-Yao precomputes the PDF's of the numbers based on
+    standard deviation and the center, which is used during the sampling process.
+    Therefore like Peikert's method,  Knuth-Yao works best method works best if
+    the DESIRED STANDARD DEVIATION IS SMALL and THE MEAN OF THE DISTRIBUTION IS
+    FIXED, as each new center will require a new set of precomputations, just
+    like Peikert's inversion method.
+
+    The "generic sampler" on the other hand, works independent from standard
+    deviation of the distribution. It combines an array of previously discussed
+    base samplers centered around 0 to (2^b-1) / 2^b through convolution. The
+    tables of base samplers however, must be precomputed beforehand; but they do
+    not need to be recalculated at any time of the sampling process. It is USABLE
+    FOR ANY STANDARD DEVIATION AND MEAN, just like Karney's method defined in
+    discretegaussiangenerator.h, needs only one single precomputation and is not
+    prone to timing attacks unlike Karney. Karney's method, however, is faster
+    than the generic sampler.
+
+    PARAMETER SELECTION FOR GENERIC SAMPLER
+
+    The selection of parameters change the run time/memory usage/precision of the
+    generic sampler. The triple trade off between these parameters are defined in
+    the equation k = (PRECISION - FLIPS) / LOG_BASE. k denotes the level of
+    precision of the generic sampler. Higher the k is, higher the precision of
+    the generic sampler but higher the run time. PRECISION denotes the number of
+    decimal bits in the center of the distribution. Since we are using 'double'
+    for mean, it is fixed to 53 by definition. FLIPS denote the number of
+    Bernoulli flips used to approximate the bits used in combination of base
+    sampler. Higher the number of flips, larger the number of bits approximated
+    rather than calculated which means smaller run times. Generic sampler
+    requires a set of base samplers centered around 0/2^b to (2^b-1)/2^b;
+    LOG_BASE denotes b in this equation. Higher the LOG_BASE is, more base
+    samplers required which requires additional memory; but at the same time
+    smaller run times.
+
+    The base samplers used in generic sampler requires varying centers between
+    0/2^b and (2^b-1)/(2^b) with the same standard deviation. The standard
+    deviation required for base samplers must satisfy SIGMA>=4*SQRT(2)*N, where
+    sigma is the standard deviation of the base sampler and N is the smoothing
+    parameter
+
+ */
 
 use rand::prelude::*;
 use std::collections::HashMap;
