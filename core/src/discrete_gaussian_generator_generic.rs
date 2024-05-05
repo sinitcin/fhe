@@ -152,13 +152,12 @@
    discretegaussiangeneratorgeneric.cpp
 */
 
-use rand::prelude::*;
-// use rand::distributions::{Distribution, Standard};
-use rand::Rng;
+use std::{collections::VecDeque, fmt::Debug};
 
 const PRECISION: u32 = 53;
 const BERNOULLI_FLIPS: u32 = 23;
 const MAX_TREE_DEPTH: i32 = 64;
+const MAX_LEVELS: i32 = 4;
 
 // const double DG_ERROR = 8.27181e-25;
 // const int32_t N_MAX = 16384;
@@ -167,6 +166,7 @@ const MAX_TREE_DEPTH: i32 = 64;
 // const double TAIL_CUT = std::sqrt(log(2)*2*(double)(PRECISION));
 // const int32_t DDG_DEPTH = 13;
 
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub enum BaseSamplerType {
     KnuthYao,
     PeikertInversion,
@@ -174,6 +174,7 @@ pub enum BaseSamplerType {
 
 /// 🇷🇺 Реализация класса для генерации случайных битов. Создан для централизации пулов случайных битов в сэмплерах
 /// 🇬🇧 Class implementation to generate random bit. This is created for centralizing the random bit pools by the samplers.
+#[derive(Debug, Clone)]
 pub struct BitGenerator {
     sequence: u32,
     counter: u32,
@@ -198,30 +199,34 @@ impl BitGenerator {
         self.counter -= 1;
         bit as i16
     }
+
+    pub fn generate_bit(&mut self) -> bool {
+        self.generate() != 0
+    }
 }
 
 /// 🇷🇺 Определение класса для базовых сэмплеров с предварительными вычислениями, которое используется для общего сэмплера UCSD
 /// 🇬🇧 Class definition for base samplers with precomputation that is used for UCSD generic sampler
-pub struct BaseSampler {
+#[derive(Debug, Clone)]
+pub struct BaseSamplerObject {
     /// 🇷🇺 Средняя величина используемого распределения
     /// 🇬🇧 Mean of the distribution used
-    b_mean: i64,
+    b_mean: f64,
 
     /// 🇷🇺 Стандартное отклонение распределения.
     /// 🇬🇧 The standard deviation of the distribution.
-    b_std: f32,
+    b_std: f64,
 
     /// 🇷🇺 Генератор, используемый для создания случайных битов путем выборки
     /// 🇬🇧 Generator used for creating random bits through sampling
-    bg: ThreadRng,
-    // bg: Box<dyn BitGenerator>,
+    bg: BitGenerator, // bg: Box<dyn BitGenerator>,
+
     /// 🇷🇺 Тип базового сэмплера (Knuth Yao или Peikert's Inversion)
     /// 🇬🇧 Type of the base sampler (Knuth Yao or Peikert's Inversion)
     b_type: BaseSamplerType,
 
     b_a: f64,
-    hammingweights: Vec<u64>,
-    ddg_tree: Vec<Vec<bool>>,
+    ddg_tree: Vec<VecDeque<i32>>,
 
     /// 🇷🇺 Массив, хранящий веса Хэмминга матрицы вероятностей, используемой в выборке Кнута-Яо
     /// 🇬🇧 Array that stores the Hamming Weights of the probability matrix used in Knuth-Yao sampling
@@ -244,10 +249,10 @@ pub struct BaseSampler {
 /// 🇷🇺 Трейт для базовых сэмплеров
 /// 🇬🇧 Trait for base samplers
 trait BaseSampler {
-    fn generate_integer(&self) -> i64;
+    fn generate_integer(&mut self) -> i64;
 }
 
-impl BaseSampler {
+impl BaseSamplerObject {
     /// 🇷🇺 Конструктор
     ///
     /// Параметры:
@@ -264,52 +269,32 @@ impl BaseSampler {
     /// - std: Standard deviation of the distribution
     /// - generator: Pointer to the bit generator that the sampler will use the random bits from
     /// - bType: Type of the base sampler
-    pub fn new(mean: f64, std: f64, b_type: BaseSamplerType) -> Self {
-        let mut rng = thread_rng();
-        let b_mean = mean as i64;
-        let b_std = std as f32;
-        let bg = rng;
-
-        BaseSampler {
-            b_mean,
-            b_std,
-            bg,
-            b_type,
-            ddg_tree: Vec::new(),
-            hamming_weights: Vec::new(),
-            b_matrix_size: 0,
-            first_non_zero: 0,
-            end_index: 0,
-            m_vals: Vec::new(),
-        }
-    }
-
-    fn new(mean: f64, std: f64, generator: Box<dyn BitGenerator>, type_: BaseSamplerType) -> Self {
-        let acc = 1e-17;
+    fn new(mean: f64, std: f64, generator: BitGenerator, b_type: BaseSamplerType) -> Self {
+        let acc: f64 = 1e-17;
         let fin = (std * (-2.0 * acc.ln()).sqrt()).ceil() as i32;
-        let mut b_mean = if mean >= 0.0 {
+        let b_mean = if mean >= 0.0 {
             mean.floor()
         } else {
             mean.ceil()
         };
 
         let mean = mean - b_mean;
-        let mut sampler = BaseSampler {
+        let mut sampler = BaseSamplerObject {
             b_mean,
             b_std: std,
             bg: generator,
-            b_type: type_,
+            b_type,
             fin,
             m_vals: Vec::new(),
             b_a: 0.0,
             b_matrix_size: 0,
-            hammingweights: vec![0; 64],
+            hamming_weights: vec![0; 64],
             ddg_tree: Vec::new(),
             first_non_zero: -1,
             end_index: 0,
         };
 
-        if type_ == BaseSamplerType::PEIKERT {
+        if b_type == BaseSamplerType::PeikertInversion {
             sampler.initialize(mean);
         } else {
             sampler.generate_prob_matrix(std, mean);
@@ -318,108 +303,10 @@ impl BaseSampler {
         sampler
     }
 
-    fn generate_prob_matrix(&mut self, stddev: f64, mean: f64) {
-        let mut prob_matrix = vec![0u64; 2 * self.fin as usize + 1];
-        let mut probs = vec![0.0; 2 * self.fin as usize + 1];
-        let mut s = 0.0;
-        self.b_std = stddev;
-        let mut error = 1.0;
-
-        for i in -self.fin..=self.fin {
-            let prob = (-((i - mean).powi(2) / (2.0 * stddev.powi(2)))).exp();
-            s += prob;
-            probs[(i + self.fin) as usize] = prob;
-        }
-
-        prob_matrix[prob_matrix.len() - 1] = (error * 2.0f64.powi(64)) as u64;
-
-        for i in 0..prob_matrix.len() {
-            error -= probs[i] / s;
-            prob_matrix[i] = (probs[i] / s * 2.0f64.powi(64)) as u64;
-            for j in 0..64 {
-                self.hammingweights[j] += ((prob_matrix[i] >> (63 - j)) & 1) as u64;
-            }
-        }
-
-        self.generate_ddg_tree(prob_matrix);
-    }
-
-    fn generate_ddg_tree(&mut self, prob_matrix: Vec<u64>) {
-        self.first_non_zero = -1;
-        for i in 0..64 {
-            if self.hammingweights[i] != 0 {
-                self.first_non_zero = i as i32;
-                break;
-            }
-        }
-
-        self.end_index = self.first_non_zero;
-        let mut inode_count = 1;
-        for _ in 0..self.first_non_zero {
-            inode_count *= 2;
-        }
-
-        let mut end = false;
-        let mut max_node_count = inode_count;
-        for i in self.first_non_zero..MAX_TREE_DEPTH {
-            inode_count *= 2;
-            self.end_index += 1;
-            if inode_count as u32 >= max_node_count {
-                max_node_count = inode_count;
-            }
-            inode_count -= self.hammingweights[i as usize] as i32;
-            if inode_count <= 0 {
-                end = true;
-                if inode_count < 0 {
-                    self.end_index -= 1;
-                }
-                break;
-            }
-        }
-
-        let size = max_node_count as usize;
-        self.ddg_tree = vec![VecDeque::with_capacity(self.end_index - self.first_non_zero); size];
-
-        for i in 0..size {
-            self.ddg_tree[i] =
-                VecDeque::from(vec![-2; (self.end_index - self.first_non_zero) as usize]);
-        }
-
-        inode_count = 1;
-        for _ in 0..self.first_non_zero {
-            inode_count *= 2;
-        }
-
-        for i in self.first_non_zero..self.end_index {
-            inode_count *= 2;
-            inode_count -= self.hammingweights[(i as usize)] as i32;
-            for j in 0..(inode_count as u32) {
-                self.ddg_tree[j as usize][(i - self.first_non_zero) as usize] = -1;
-            }
-            let mut enode_count = 0;
-            for j in 0..prob_matrix.len() {
-                if (prob_matrix[j] >> (63 - i as u32)) & 1 != 0 {
-                    self.ddg_tree[inode_count as usize + enode_count]
-                        [(i - self.first_non_zero) as usize] = j as i32;
-                    enode_count += 1;
-                }
-            }
-        }
-    }
-
-    /// 🇷🇺 Метод генерации целого числа из базового сэмпла случайного целого числа из распределения
-    /// 🇬🇧 Method for generating integer from the base sampler a random integer from the distribution
-    pub fn generate_integer(&mut self) -> i64 {
-        match self.b_type {
-            BaseSamplerType::KnuthYao => self.generate_integer_knuth_yao(),
-            BaseSamplerType::PeikertInversion => self.generate_integer_peikert(),
-        }
-    }
-
     /// 🇷🇺 Метод генерации случайного бита с помощью генератора битов в пределах возврата случайного бита
     /// 🇬🇧 Method for generating a random bit from the bit generator within return a random bit
     fn random_bit(&mut self) -> bool {
-        self.bg.gen_bool(0.5)
+        self.bg.generate() != 0
     }
 
     /// 🇷🇺 Подпроцедура, вызываемая инверсионной выборкой Пейкерта
@@ -458,7 +345,67 @@ impl BaseSampler {
     /// Parameters:
     /// - probMatrix: The probability matrix used for filling the DDG tree
     fn generate_ddg_tree(&mut self, prob_matrix: &[u64]) {
-        // Implementation goes here
+        self.first_non_zero = -1;
+        for i in 0..64 {
+            if self.hamming_weights[i] != 0 {
+                self.first_non_zero = i as i32;
+                break;
+            }
+        }
+
+        self.end_index = self.first_non_zero;
+        let mut inode_count = 1;
+        for _ in 0..self.first_non_zero {
+            inode_count *= 2;
+        }
+
+        // let mut end = false;
+        let mut max_node_count = inode_count;
+        for i in self.first_non_zero..MAX_TREE_DEPTH {
+            inode_count *= 2;
+            self.end_index += 1;
+            if inode_count as u32 >= max_node_count {
+                max_node_count = inode_count;
+            }
+            inode_count -= self.hamming_weights[i as usize];
+            if inode_count <= 0 {
+                // end = true;
+                if inode_count < 0 {
+                    self.end_index -= 1;
+                }
+                break;
+            }
+        }
+
+        let size = max_node_count as usize;
+        self.ddg_tree =
+            vec![VecDeque::with_capacity((self.end_index - self.first_non_zero) as usize); size];
+
+        for i in 0..size {
+            self.ddg_tree[i] =
+                VecDeque::from(vec![-2; (self.end_index - self.first_non_zero) as usize]);
+        }
+
+        inode_count = 1;
+        for _ in 0..self.first_non_zero {
+            inode_count *= 2;
+        }
+
+        for i in self.first_non_zero..self.end_index {
+            inode_count *= 2;
+            inode_count -= self.hamming_weights[i as usize];
+            for j in 0..(inode_count as u32) {
+                self.ddg_tree[j as usize][(i - self.first_non_zero) as usize] = -1;
+            }
+            let mut enode_count = 0;
+            for j in 0..prob_matrix.len() {
+                if (prob_matrix[j] >> (63 - i as u32)) & 1 != 0 {
+                    self.ddg_tree[inode_count as usize + enode_count]
+                        [(i - self.first_non_zero) as usize] = j as i32;
+                    enode_count += 1;
+                }
+            }
+        }
     }
 
     /// 🇷🇺 Инициализирует генератор, используемый для метода инверсии Пейкерта.
@@ -477,13 +424,13 @@ impl BaseSampler {
         let mut cusum = 0.0;
 
         for x in (-self.fin)..=self.fin {
-            cusum += (-(x - mean).powi(2) / (variance * 2.0)).exp();
+            cusum += (-(x as f64 - mean).powi(2) / (variance * 2.0)).exp();
         }
 
         self.b_a = 1.0 / cusum;
 
         for i in (-self.fin)..=self.fin {
-            let temp = self.b_a * (-(f64::from(i - mean).powi(2) / (2.0 * variance))).exp();
+            let temp = self.b_a * (-(f64::from(i as f64 - mean).powi(2) / (2.0 * variance))).exp();
             self.m_vals.push(temp);
         }
 
@@ -506,7 +453,32 @@ impl BaseSampler {
     /// - mean: Center of the distribution
     /// - tableCount: Number of probability tables to be generated
     fn generate_prob_matrix(&mut self, stddev: f64, mean: f64) {
-        // Implementation goes here
+        let mut prob_matrix = vec![0u64; 2 * self.fin as usize + 1];
+        let mut probs = vec![0.0; 2 * self.fin as usize + 1];
+        let mut s = 0.0;
+        self.b_std = stddev;
+        let mut error = 1.0;
+
+        for i in -self.fin..=self.fin {
+            let prob = (-((i as f64 - mean).powi(2) / (2.0 * stddev.powi(2)))).exp();
+            s += prob;
+            probs[(i + self.fin) as usize] = prob;
+        }
+
+        match prob_matrix.last_mut() {
+            Some(last) => *last = (error * 2.0f64.powi(64)) as u64,
+            None => panic!("Error in generate_prob_matrix"),
+        }
+
+        for i in 0..prob_matrix.len() {
+            error -= probs[i] / s;
+            prob_matrix[i] = (probs[i] / s * 2.0f64.powi(64)) as u64;
+            for j in 0..64 {
+                self.hamming_weights[j] += ((prob_matrix[i] >> (63 - j)) & 1) as u32;
+            }
+        }
+
+        self.generate_ddg_tree(&prob_matrix);
     }
 
     /// 🇷🇺 Возвращает сгенерированное целое число. Использует наивный метод Кнута-Яо.
@@ -533,7 +505,7 @@ impl BaseSampler {
             // Цикл по глубине дерева
             for i in 0..MAX_TREE_DEPTH {
                 // Генерация случайного бита
-                let bit = self.bg.generate();
+                let bit = self.bg.generate_bit();
                 // Построение индекса пути по дереву: если bit == true, выбирается правый потомок, иначе - левый
                 node_index *= 2;
                 if bit {
@@ -584,12 +556,24 @@ impl BaseSampler {
         let mut rng = thread_rng();
         let seed: f64 = rng.gen();
         let val = self.find_in_vector(&self.m_vals, seed);
-        (val - self.fin + self.b_mean as i32) as i64
+        (val as i32 - self.fin + self.b_mean as i32) as i64
+    }
+}
+
+impl BaseSampler for BaseSamplerObject {
+    /// 🇷🇺 Метод генерации целого числа из базового сэмпла случайного целого числа из распределения
+    /// 🇬🇧 Method for generating integer from the base sampler a random integer from the distribution
+    fn generate_integer(&mut self) -> i64 {
+        match self.b_type {
+            BaseSamplerType::KnuthYao => self.generate_integer_knuth_yao(),
+            BaseSamplerType::PeikertInversion => self.generate_integer_peikert(),
+        }
     }
 }
 
 /// 🇷🇺 Класс для объединения образцов из двух базовых пробоотборников, который используется для общего отбора образцов UCSD
 /// 🇬🇧 Class for combining samples from two base samplers, which is used for UCSD generic sampling
+#[derive(Clone)]
 struct SamplerCombiner {
     sampler1: Box<dyn BaseSampler>,
     sampler2: Box<dyn BaseSampler>,
@@ -615,7 +599,10 @@ impl SamplerCombiner {
     /// * `s2` - Pointer to the second sampler to be combined
     /// * `z1` - Coefficient for the first sampler
     /// * `z2` - Coefficient for the second sampler
-    fn new(s1: Box<dyn BaseSampler>, s2: Box<dyn BaseSampler>, z1: i64, z2: i64) -> Self {
+    fn new<T>(s1: Box<T>, s2: Box<T>, z1: i64, z2: i64) -> Self
+    where
+        T: BaseSampler + Clone + 'static,
+    {
         SamplerCombiner {
             sampler1: s1,
             sampler2: s2,
@@ -623,10 +610,12 @@ impl SamplerCombiner {
             x2: z2,
         }
     }
+}
 
+impl BaseSampler for SamplerCombiner {
     /// 🇷🇺 Возвращает комбинированное значение для двух сэмплеров с заданными коэффициентами
     /// 🇬🇧 Return the combined value for two samplers with given coefficients
-    fn generate_integer(&self) -> i64 {
+    fn generate_integer(&mut self) -> i64 {
         self.x1 * self.sampler1.generate_integer() + self.x2 * self.sampler2.generate_integer()
     }
 }
@@ -634,9 +623,9 @@ impl SamplerCombiner {
 /// 🇷🇺 Структура для генератора дискретного гауссовского распределения Generic.
 /// 🇬🇧 The struct for Generic Discrete Gaussian Distribution generator.
 struct DiscreteGaussianGeneratorGeneric {
-    base_samplers: Vec<BaseSampler>,
-    wide_sampler: BaseSampler,
-    combiners: Vec<BaseSampler>,
+    base_samplers: Vec<Box<dyn BaseSampler>>,
+    wide_sampler: Box<dyn BaseSampler>,
+    combiners: Vec<Box<dyn BaseSampler>>,
     wide_variance: f64,
     sampler_variance: f64,
     x: f64,
@@ -665,32 +654,37 @@ impl DiscreteGaussianGeneratorGeneric {
     /// * `std` - Standard deviation of the base samplers
     /// * `b` - Log of number of centers that are used for calculating base samplers (Recall that base samplers are centered from 0 to (2^b-1)/2^b)
     /// * `N` - Smoothing parameter
-    fn new(samplers: Vec<BaseSampler>, std: f64, b: i32, N: f64) -> Self {
-        // Precomputation logic here
-        DiscreteGaussianGeneratorGeneric {
-            base_samplers: samplers,
-            wide_sampler: BaseSampler::new(),
-            combiners: vec![],
-            wide_variance: 0.0,
-            sampler_variance: 0.0,
-            x: 0.0,
-            c: 0.0,
-            ci: 0.0,
-            k: 0,
-            log_base: b,
-            mask: 0,
-        }
-    }
+    // fn new(samplers: Vec<Box<dyn BaseSampler>>, std: f64, b: i32, N: f64) -> Self {
+    //     // Precomputation logic here
+    //     DiscreteGaussianGeneratorGeneric {
+    //         base_samplers: samplers,
+    //         wide_sampler: BaseSampler::new(),
+    //         combiners: vec![],
+    //         wide_variance: 0.0,
+    //         sampler_variance: 0.0,
+    //         x: 0.0,
+    //         c: 0.0,
+    //         ci: 0.0,
+    //         k: 0,
+    //         log_base: b,
+    //         mask: 0,
+    //     }
+    // }
 
-    fn new(samplers: Vec<Box<dyn Rng>>, std: f64, b: u32, n: f64) -> Self {
-        let mut wide_sampler = samplers[0].clone();
+    fn new(samplers: Vec<Box<dyn BaseSampler>>, std: f64, b: i32, n: f64) -> Self {
+        let mut wide_sampler: Box<dyn BaseSampler> = Box::new(samplers[0].clone());
         let mut wide_variance = std.powi(2);
-        let mut combiners = Vec::new();
+        let mut combiners: Vec<Box<dyn BaseSampler>> = Vec::new();
 
         for _ in 1..MAX_LEVELS {
             let x1 = (wide_variance / (2.0 * n.powi(2))).sqrt().floor() as u32;
             let x2 = std::cmp::max(x1 - 1, 1);
-            wide_sampler = Box::new(SamplerCombiner::new(wide_sampler, wide_sampler, x1, x2));
+            wide_sampler = Box::new(SamplerCombiner::new(
+                wide_sampler.clone(),
+                wide_sampler,
+                x1 as i64,
+                x2 as i64,
+            ));
             combiners.push(wide_sampler.clone());
             wide_variance = (x1.pow(2) + x2.pow(2)) as f64 * wide_variance;
         }
@@ -699,10 +693,10 @@ impl DiscreteGaussianGeneratorGeneric {
         let mask = (1u64 << b) - 1;
 
         let mut sampler_variance = 1.0;
-        let t = 1.0 / (1u64 << (2 * b));
+        let t = 1 / (1u64 << (2 * b));
         let mut s = 1.0;
         for _ in 1..k {
-            s *= t;
+            s *= t as f64;
             sampler_variance += s;
         }
         sampler_variance *= std.powi(2);
@@ -713,9 +707,12 @@ impl DiscreteGaussianGeneratorGeneric {
             wide_sampler,
             wide_variance,
             combiners,
-            k,
+            k: k as i32,
             mask,
             sampler_variance,
+            x: 0.0,
+            c: 0.0,
+            ci: 0.0,
         }
     }
 
@@ -740,7 +737,7 @@ impl DiscreteGaussianGeneratorGeneric {
     // }
     fn generate_integer(&mut self, center: f64, std: f64) -> i64 {
         let variance = std.powi(2);
-        let x = self.wide_sampler.gen::<i64>();
+        let x = self.wide_sampler.generate_integer();
 
         let c =
             center + (x as f64) * ((variance - self.sampler_variance) / self.wide_variance).sqrt();
@@ -753,9 +750,9 @@ impl DiscreteGaussianGeneratorGeneric {
 
     /// 🇷🇺 Возвращает сгенерированное целое число с использованием базового сэмплера.
     /// 🇬🇧 Returns a generated integer using the base sampler.
-    fn generate_integer(&self) -> i64 {
-        self.base_samplers[0].generate_integer()
-    }
+    // fn generate_integer(&self) -> i64 {
+    //     self.base_samplers[0].generate_integer()
+    // }
 
     /// 🇷🇺 Подпрограмма, используемая в Выборке C
     ///
@@ -770,16 +767,16 @@ impl DiscreteGaussianGeneratorGeneric {
     /// * `center` - Center of the distribution
     ///
     fn flip_and_round(&mut self, center: f64) -> i64 {
-        let c = (center * (1u64 << PRECISION)) as i64;
-        let base_c = (c >> BERNOULLI_FLIPS);
+        let c = (center as u64 * (1u64 << PRECISION)) as i64;
+        let base_c = c >> BERNOULLI_FLIPS;
         let mut random_bit;
 
         for i in (0..BERNOULLI_FLIPS).rev() {
-            random_bit = self.base_samplers[0].gen::<bool>() as i64;
-            if random_bit > self.extract_bit(c, i as u32) {
+            random_bit = self.base_samplers[0].generate_integer();
+            if random_bit > self.extract_bit(c, i as i32).into() {
                 return self.sample_c(base_c);
             }
-            if random_bit < self.extract_bit(c, i as u32) {
+            if random_bit < self.extract_bit(c, i as i32).into() {
                 return self.sample_c(base_c + 1);
             }
         }
@@ -808,7 +805,7 @@ impl DiscreteGaussianGeneratorGeneric {
         let mut c = center;
         let mut sample;
         for _ in 0..self.k {
-            sample = self.base_samplers[(self.mask & c as u64) as usize].gen::<i64>();
+            sample = self.base_samplers[(self.mask & c as u64) as usize].generate_integer();
             if (self.mask & c as u64) > 0 && c < 0 {
                 sample -= 1;
             }
@@ -846,14 +843,3 @@ impl DiscreteGaussianGeneratorGeneric {
         ((number >> n) & 0x1) as i32
     }
 }
-
-// 🇷🇺
-// 🇬🇧 This Rust code translates the provided C++ code for the `SamplerCombiner` class. Here are the key points:
-
-// 1. We define a `SamplerCombiner` struct to represent the class.
-// 2. We define a `BaseSampler` trait to represent the base sampler interface.
-// 3. The `SamplerCombiner` struct has fields for the two base samplers (`sampler1` and `sampler2`) and their coefficients (`x1` and `x2`).
-// 4. The `new` function is the constructor, which takes the two base samplers and their coefficients as arguments.
-// 5. The `generate_integer` method implements the `GenerateInteger` function from the C++ code, combining the results of the two base samplers using the coefficients.
-
-// Note that we use trait objects (`Box<dyn BaseSampler>`) to represent the base samplers, as Rust doesn't have direct support for abstract base classes like C++. We also use the `Box` smart pointer to manage the memory of the base sampler objects.
