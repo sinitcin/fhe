@@ -250,6 +250,14 @@ pub struct BaseSamplerObject {
 /// 🇬🇧 Trait for base samplers
 trait BaseSampler {
     fn generate_integer(&mut self) -> i64;
+
+    fn clone_dyn(&self) -> Box<dyn BaseSampler>;
+}
+
+impl Clone for Box<dyn BaseSampler> {
+    fn clone(&self) -> Self {
+        self.clone_dyn()
+    }
 }
 
 impl BaseSamplerObject {
@@ -569,6 +577,10 @@ impl BaseSampler for BaseSamplerObject {
             BaseSamplerType::PeikertInversion => self.generate_integer_peikert(),
         }
     }
+
+    fn clone_dyn(&self) -> Box<dyn BaseSampler> {
+        Box::new(self.clone())
+    }
 }
 
 /// 🇷🇺 Класс для объединения образцов из двух базовых пробоотборников, который используется для общего отбора образцов UCSD
@@ -599,10 +611,7 @@ impl SamplerCombiner {
     /// * `s2` - Pointer to the second sampler to be combined
     /// * `z1` - Coefficient for the first sampler
     /// * `z2` - Coefficient for the second sampler
-    fn new<T>(s1: Box<T>, s2: Box<T>, z1: i64, z2: i64) -> Self
-    where
-        T: BaseSampler + Clone + 'static,
-    {
+    fn new(s1: Box<dyn BaseSampler>, s2: Box<dyn BaseSampler>, z1: i64, z2: i64) -> Self {
         SamplerCombiner {
             sampler1: s1,
             sampler2: s2,
@@ -617,6 +626,10 @@ impl BaseSampler for SamplerCombiner {
     /// 🇬🇧 Return the combined value for two samplers with given coefficients
     fn generate_integer(&mut self) -> i64 {
         self.x1 * self.sampler1.generate_integer() + self.x2 * self.sampler2.generate_integer()
+    }
+
+    fn clone_dyn(&self) -> Box<dyn BaseSampler> {
+        Box::new(self.clone())
     }
 }
 
@@ -672,7 +685,7 @@ impl DiscreteGaussianGeneratorGeneric {
     // }
 
     fn new(samplers: Vec<Box<dyn BaseSampler>>, std: f64, b: i32, n: f64) -> Self {
-        let mut wide_sampler: Box<dyn BaseSampler> = Box::new(samplers[0].clone());
+        let mut wide_sampler: Box<dyn BaseSampler> = samplers[0].clone();
         let mut wide_variance = std.powi(2);
         let mut combiners: Vec<Box<dyn BaseSampler>> = Vec::new();
 
